@@ -15,16 +15,6 @@ st.set_page_config(page_title="Treatment Cost Calculator", layout="centered")
 st.markdown("""
 <style>
 
-/* Remove space under header */
-.block-container {
-    padding-top: 0rem !important;
-}
-
-/* Remove default top margin */
-div[data-testid="stAppViewContainer"] > .main {
-    padding-top: 0rem;
-}
-
 /* Background */
 body {
     background-color: #f5f5f5;
@@ -41,13 +31,7 @@ body {
     margin-bottom: 25px;
 }
 
-/* Main card */
-.card {
-    background-color: white;
-    padding: 30px;
-    border-radius: 14px;
-    box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
-}
+
 
 /* Titles */
 h1 {
