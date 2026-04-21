@@ -31,25 +31,17 @@ h2, h3 {
     color: #e2e8f0;
 }
 
-.stTextInput, .stSelectbox, .stNumberInput {
-    background-color: #1e293b;
-}
-
 .stMetric {
     background: rgba(255,255,255,0.05);
     padding: 15px;
     border-radius: 15px;
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.1);
     text-align: center;
-    font-size: 18px;
 }
-
 .card {
     background: rgba(255,255,255,0.05);
     padding: 20px;
     border-radius: 15px;
-    backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.1);
     margin-bottom: 20px;
 }
@@ -69,6 +61,11 @@ def extract_number(value):
         return float(number[0]) if number else None
     except:
         return None
+
+def convert_to_mg(dose, unit):
+    if unit == "mcgs":
+        return dose / 1000
+    return dose
 
 def format_date_us(d):
     try:
@@ -94,29 +91,25 @@ st.subheader("🧑 Patient Information")
 
 col1, col2, col3 = st.columns(3)
 
+# Sorted providers
+providers = sorted([
+    "Sreecharan Mavuram MD",
+    "Syed Raza MD",
+    "Navneet Mittal MD"
+])
+
 with col1:
     patient_name = st.text_input("Patient Name")
-
-    dob = st.date_input(
-        "Date of Birth",
-        min_value=date.today().replace(year=date.today().year - 100),
-        max_value=date.today()
-    )
-
-    st.caption(f"📅 Selected: {format_date_us(dob)}")
+    dob = st.date_input("Date of Birth", min_value=date.today().replace(year=date.today().year - 100))
+    st.caption(f"📅 {format_date_us(dob)}")
 
 with col2:
-    doctor = st.text_input("Doctor Name")
-
+    provider = st.selectbox("Provider", providers)
     treatment_date = st.date_input("Date of Treatment", value=date.today())
-
-    st.caption(f"📅 Selected: {format_date_us(treatment_date)}")
+    st.caption(f"📅 {format_date_us(treatment_date)}")
 
 with col3:
-    location = st.selectbox(
-        "Clinic Location",
-        ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"]
-    )
+    location = st.selectbox("Clinic Location", ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"])
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -141,17 +134,10 @@ if has_secondary:
     secondary_options = [""] + payer_columns + ["Other / Funding"]
 
     with col1:
-        secondary_dropdown = st.selectbox(
-            "Secondary Insurance",
-            secondary_options,
-            index=0
-        )
+        secondary_dropdown = st.selectbox("Secondary Insurance", secondary_options)
 
     with col2:
-        secondary_text = st.text_input(
-            "Other / Funding",
-            disabled=(secondary_dropdown != "Other / Funding")
-        )
+        secondary_text = st.text_input("Other / Funding", disabled=(secondary_dropdown != "Other / Funding"))
 
     secondary_coverage = st.slider("Secondary Coverage %", 0, 100, 20) / 100
 
@@ -176,18 +162,16 @@ for i in range(int(num_drugs)):
         drug = st.selectbox(f"Drug {i+1}", df["Drug_Name"].unique(), key=f"d{i}")
 
     with col2:
-        dose = st.number_input(
-            f"Dose {i+1}",
-            min_value=0,
-            step=1,
-            format="%d",
-            key=f"dose{i}"
-        )
+        dose = st.number_input("Dose", min_value=0, step=1, format="%d", key=f"dose{i}")
 
     with col3:
-        unit = st.selectbox(f"Unit {i+1}", ["mg", "mcg"], key=f"u{i}")
+        unit = st.selectbox("Units", ["mgs", "mcgs"], key=f"u{i}")
 
-    drug_entries.append({"drug": drug, "dose": dose})
+    drug_entries.append({
+        "drug": drug,
+        "dose": dose,
+        "unit": unit
+    })
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -196,9 +180,6 @@ st.markdown('</div>', unsafe_allow_html=True)
 # -------------------------
 if st.button("Calculate"):
 
-    # -------------------------
-    # VALIDATION
-    # -------------------------
     error = False
 
     if has_secondary:
@@ -213,9 +194,6 @@ if st.button("Calculate"):
     if error:
         st.stop()
 
-    # -------------------------
-    # CALCULATIONS
-    # -------------------------
     total_cost = 0
     total_allowed = 0
 
@@ -225,9 +203,10 @@ if st.button("Calculate"):
         billing_unit = extract_number(drug_data["Billing_Unit"])
         cost = extract_number(drug_data["Cost_per_Unit"])
         allowable = extract_number(drug_data[payer])
-        dose_val = extract_number(entry["dose"])
 
-        units = math.ceil(dose_val / billing_unit)
+        dose_mg = convert_to_mg(entry["dose"], entry["unit"])
+
+        units = math.ceil(dose_mg / billing_unit)
 
         total_cost += units * cost
         total_allowed += units * allowable
@@ -242,20 +221,14 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient = remaining + copay
 
-    # -------------------------
-    # RESULTS
-    # -------------------------
     st.subheader("💰 Financial Summary")
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Total Cost", f"${total_cost:,.2f}")
-    c2.metric("Primary Pays", f"${primary_payment:,.2f}")
-    c3.metric("Patient Pays", f"${patient:,.2f}")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Cost", f"${total_cost:,.2f}")
+    col2.metric("Primary Pays", f"${primary_payment:,.2f}")
+    col3.metric("Patient Pays", f"${patient:,.2f}")
 
     if has_secondary:
         st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
     else:
-        st.info(f"""
-        Patient doesn't have any secondary insurance.  
-        Patient is responsible to pay the remaining amount of **${remaining:,.2f}** plus any copay.
-        """)
+        st.info(f"Patient responsible: ${remaining:,.2f}")
