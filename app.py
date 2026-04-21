@@ -20,6 +20,11 @@ body {
     background-color: #f5f5f5;
 }
 
+/* Remove top gap */
+.block-container {
+    padding-top: 0rem !important;
+}
+
 /* Header bar */
 .topbar {
     background-color: #8b9a77;
@@ -31,7 +36,13 @@ body {
     margin-bottom: 25px;
 }
 
-
+/* Main card */
+.card {
+    background-color: white;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+}
 
 /* Titles */
 h1 {
@@ -43,7 +54,7 @@ h2, h3 {
     color: #344e41;
 }
 
-/* Buttons */
+/* Button */
 .stButton > button {
     background-color: #6b7f4e;
     color: white;
@@ -56,26 +67,20 @@ h2, h3 {
     background-color: #55663c;
 }
 
-/* Inputs spacing */
-.stTextInput, .stNumberInput, .stSelectbox {
-    margin-bottom: 10px;
-}
-
-/* Metrics */
+/* Metrics FIX */
 .stMetric {
-    background-color: #f9fafb;
-    padding: 12px;
-    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 14px;
+    border-radius: 10px;
     border: 1px solid #e5e7eb;
+    box-shadow: 0px 1px 4px rgba(0,0,0,0.05);
 }
 
-/* Metric label */
 .stMetric label {
     color: #374151 !important;
     font-weight: 500;
 }
 
-/* Metric value */
 .stMetric div {
     color: #111827 !important;
     font-size: 20px;
@@ -207,11 +212,22 @@ if st.button("Calculate"):
         total_cost += units * cost
         total_allowed += units * allowable
 
+    # -------------------------
+    # INSURANCE CALCULATION
+    # -------------------------
     primary_payment = total_allowed * primary_coverage
     remaining = total_allowed - primary_payment
-    secondary_payment = remaining * secondary_coverage
-    patient = remaining - secondary_payment + copay
 
+    if has_secondary:
+        secondary_payment = remaining * secondary_coverage
+        patient = remaining - secondary_payment + copay
+    else:
+        secondary_payment = 0
+        patient = remaining + copay
+
+    # -------------------------
+    # OUTPUT
+    # -------------------------
     st.subheader("Financial Summary")
 
     col1, col2, col3 = st.columns(3)
@@ -219,6 +235,13 @@ if st.button("Calculate"):
     col2.metric("Primary Pays", f"${primary_payment:,.2f}")
     col3.metric("Patient Pays", f"${patient:,.2f}")
 
-    st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
+    if has_secondary:
+        st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
+    else:
+        st.info(f"""
+        Patient doesn't have any secondary insurance.
+
+        Patient is responsible to pay the remaining amount of **${remaining:,.2f}** plus any copay.
+        """)
 
 st.markdown('</div>', unsafe_allow_html=True)
