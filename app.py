@@ -12,10 +12,7 @@ st.title("💊 Patient Treatment Cost Calculator")
 try:
     df = pd.read_excel("drug_data.xlsx")
     df.columns = df.columns.str.strip()
-
-    # Remove empty rows
     df = df.dropna(subset=["Drug_Name"])
-
 except Exception as e:
     st.error(f"❌ Error loading Excel file: {e}")
     st.stop()
@@ -24,7 +21,6 @@ except Exception as e:
 # Detect Payer Columns
 # -------------------------
 base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
-
 payer_columns = [col for col in df.columns if col not in base_columns]
 
 if not payer_columns:
@@ -124,14 +120,48 @@ if st.button("Calculate"):
 
         drug_data = drug_df.iloc[0]
 
-        billing_unit = drug_data["Billing_Unit"]
-        cost_per_unit = drug_data["Cost_per_Unit"]
+        # -------------------------
+        # Safe conversions
+        # -------------------------
+        try:
+            billing_unit = float(drug_data["Billing_Unit"])
+        except:
+            st.error(f"❌ Invalid Billing Unit for {entry['drug']}")
+            st.stop()
 
-        # Get payer-specific allowable
-        allowable_per_unit = drug_data[payer]
+        try:
+            cost_per_unit = float(drug_data["Cost_per_Unit"])
+        except:
+            st.error(f"❌ Invalid Cost for {entry['drug']}")
+            st.stop()
 
-        # Billing logic (round UP)
-        units_billed = math.ceil(entry["dose"] / billing_unit)
+        try:
+            allowable_per_unit = float(drug_data[payer])
+        except:
+            st.error(f"❌ Invalid Allowable for {entry['drug']} under {payer}")
+            st.stop()
+
+        try:
+            dose_value = float(entry["dose"])
+        except:
+            st.error(f"❌ Invalid Dose for {entry['drug']}")
+            st.stop()
+
+        # -------------------------
+        # Validation
+        # -------------------------
+        if billing_unit <= 0:
+            st.error(f"❌ Billing unit must be greater than 0 for {entry['drug']}")
+            st.stop()
+
+        if dose_value <= 0:
+            st.error(f"❌ Dose must be greater than 0 for {entry['drug']}")
+            st.stop()
+
+        # -------------------------
+        # Billing Logic (CEIL)
+        # -------------------------
+        units_billed = math.ceil(dose_value / billing_unit)
 
         drug_cost = units_billed * cost_per_unit
         allowed = units_billed * allowable_per_unit
@@ -141,7 +171,7 @@ if st.button("Calculate"):
 
         detailed_rows.append({
             "Drug": entry["drug"],
-            "Dose": entry["dose"],
+            "Dose": dose_value,
             "Billing Unit": billing_unit,
             "Units Billed": units_billed,
             "Cost": round(drug_cost, 2),
