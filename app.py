@@ -10,34 +10,48 @@ from datetime import date
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# COOL MODERN UI THEME
+# MODERN UI DESIGN
 # -------------------------
 st.markdown("""
 <style>
 body {
     background: linear-gradient(135deg, #0f172a, #1e293b);
-    color: white;
-}
-
-h1, h2, h3 {
-    color: #38bdf8;
-}
-
-.stMetric {
-    background: linear-gradient(135deg, #1e3a8a, #0ea5e9);
-    color: white;
-    padding: 15px;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: bold;
-}
-
-.stDataFrame {
-    background-color: #0f172a;
 }
 
 .block-container {
     padding-top: 2rem;
+}
+
+h1 {
+    color: #38bdf8;
+    font-weight: 700;
+}
+
+h2, h3 {
+    color: #e2e8f0;
+}
+
+.stTextInput, .stSelectbox, .stNumberInput {
+    background-color: #1e293b;
+}
+
+.stMetric {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+    font-size: 18px;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -60,20 +74,16 @@ def extract_number(value):
 
 def format_date_us(d):
     try:
-        return d.strftime("%m/%d/%Y")
+        return d.strftime("%m-%d-%Y")
     except:
         return ""
 
 # -------------------------
 # LOAD DATA
 # -------------------------
-try:
-    df = pd.read_excel("drug_data.xlsx")
-    df.columns = df.columns.str.strip()
-    df = df.dropna(subset=["Drug_Name"])
-except Exception as e:
-    st.error(f"Error loading file: {e}")
-    st.stop()
+df = pd.read_excel("drug_data.xlsx")
+df.columns = df.columns.str.strip()
+df = df.dropna(subset=["Drug_Name"])
 
 base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
 payer_columns = sorted([col for col in df.columns if col not in base_columns])
@@ -81,21 +91,28 @@ payer_columns = sorted([col for col in df.columns if col not in base_columns])
 # -------------------------
 # PATIENT INFO
 # -------------------------
+st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🧑 Patient Information")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
     patient_name = st.text_input("Patient Name")
+
     dob = st.date_input(
         "Date of Birth",
         min_value=date.today().replace(year=date.today().year - 100),
         max_value=date.today()
     )
 
+    st.caption(f"📅 Selected: {format_date_us(dob)}")
+
 with col2:
     doctor = st.text_input("Doctor Name")
+
     treatment_date = st.date_input("Date of Treatment", value=date.today())
+
+    st.caption(f"📅 Selected: {format_date_us(treatment_date)}")
 
 with col3:
     location = st.selectbox(
@@ -103,9 +120,12 @@ with col3:
         ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"]
     )
 
+st.markdown('</div>', unsafe_allow_html=True)
+
 # -------------------------
 # INSURANCE
 # -------------------------
+st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🏥 Insurance")
 
 payer = st.selectbox("Primary Insurance", payer_columns)
@@ -130,9 +150,12 @@ if has_secondary:
 
 copay = st.number_input("Copay ($)", min_value=0.0)
 
+st.markdown('</div>', unsafe_allow_html=True)
+
 # -------------------------
 # MEDICATIONS
 # -------------------------
+st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("💉 Medications")
 
 num_drugs = st.number_input("Number of Drugs", 1, 10, 1)
@@ -153,8 +176,10 @@ for i in range(int(num_drugs)):
 
     drug_entries.append({"drug": drug, "dose": dose})
 
+st.markdown('</div>', unsafe_allow_html=True)
+
 # -------------------------
-# CALCULATE
+# CALCULATION
 # -------------------------
 if st.button("Calculate"):
 
@@ -169,10 +194,6 @@ if st.button("Calculate"):
         cost = extract_number(drug_data["Cost_per_Unit"])
         allowable = extract_number(drug_data[payer])
         dose_val = extract_number(entry["dose"])
-
-        if None in [billing_unit, cost, allowable, dose_val]:
-            st.error(f"Invalid data for {entry['drug']}")
-            st.stop()
 
         units = math.ceil(dose_val / billing_unit)
 
@@ -194,10 +215,7 @@ if st.button("Calculate"):
     secondary_payment = remaining * secondary_coverage
     patient = remaining - secondary_payment + copay
 
-    # OUTPUT
-    st.subheader("📊 Breakdown")
-    st.dataframe(pd.DataFrame(rows))
-
+    # RESULTS
     st.subheader("💰 Financial Summary")
 
     c1, c2, c3 = st.columns(3)
@@ -207,7 +225,6 @@ if st.button("Calculate"):
 
     st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
 
-    # SUMMARY WITH US DATE FORMAT
     st.subheader("🧾 Summary")
 
     st.write(f"""
