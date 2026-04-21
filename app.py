@@ -66,9 +66,7 @@ def extract_number(value):
         if pd.isna(value):
             return None
         number = re.findall(r"[\d\.]+", str(value))
-        if number:
-            return float(number[0])
-        return None
+        return float(number[0]) if number else None
     except:
         return None
 
@@ -123,7 +121,7 @@ with col3:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
-# INSURANCE (UPDATED)
+# INSURANCE
 # -------------------------
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🏥 Insurance")
@@ -178,7 +176,13 @@ for i in range(int(num_drugs)):
         drug = st.selectbox(f"Drug {i+1}", df["Drug_Name"].unique(), key=f"d{i}")
 
     with col2:
-        dose = st.number_input(f"Dose {i+1}", min_value=0.0, key=f"dose{i}")
+        dose = st.number_input(
+            f"Dose {i+1}",
+            min_value=0,
+            step=1,
+            format="%d",
+            key=f"dose{i}"
+        )
 
     with col3:
         unit = st.selectbox(f"Unit {i+1}", ["mg", "mcg"], key=f"u{i}")
@@ -193,7 +197,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 if st.button("Calculate"):
 
     # -------------------------
-    # VALIDATION (NEW)
+    # VALIDATION
     # -------------------------
     error = False
 
