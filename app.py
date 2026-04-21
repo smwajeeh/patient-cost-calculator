@@ -10,42 +10,53 @@ from datetime import date
 st.set_page_config(page_title="Treatment Cost Calculator", layout="centered")
 
 # -------------------------
-# FULL CSS (WHITE BAR REMOVED)
+# 🔥 FULL FIXED CSS
 # -------------------------
 st.markdown("""
 <style>
 
-/* 🔥 REMOVE STREAMLIT HEADER + TOP SPACE */
-header {visibility: hidden; height: 0px;}
-[data-testid="stToolbar"] {display: none !important;}
-[data-testid="stDecoration"] {display: none !important;}
-[data-testid="stStatusWidget"] {display: none !important;}
+/* 🔥 REMOVE STREAMLIT HEADER + TOOLBAR */
+header {display: none !important;}
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
 
+/* 🔥 REMOVE ALL TOP SPACE */
 .block-container {
     padding-top: 0rem !important;
     margin-top: 0rem !important;
 }
 
-section.main > div {
+/* 🔥 KILL EMPTY FIRST BLOCK (THIS WAS THE PROBLEM) */
+section.main > div:first-child {
     padding-top: 0rem !important;
+    margin-top: 0rem !important;
 }
 
-/* Background */
-body {
-    background-color: #f5f5f5;
+/* 🔥 REMOVE HIDDEN EMPTY DIV */
+[data-testid="stVerticalBlock"] > div:first-child:empty {
+    display: none !important;
 }
 
-/* Header bar (flush to top) */
+/* FORCE PAGE TO TOP */
+html, body, [data-testid="stAppViewContainer"] {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* HEADER (NOW PERFECTLY FLUSH) */
 .topbar {
     background-color: #8b9a77;
     padding: 14px;
     text-align: center;
     color: white;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin: 0 !important;
 }
 
-/* Main card */
+/* MAIN CARD */
 .card {
     background-color: white;
     padding: 30px;
@@ -53,17 +64,7 @@ body {
     box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
 }
 
-/* Titles */
-h1 {
-    color: #2f3e46;
-    text-align: center;
-}
-
-h2, h3 {
-    color: #344e41;
-}
-
-/* Buttons */
+/* BUTTON */
 .stButton > button {
     background-color: #6b7f4e;
     color: white;
@@ -72,35 +73,27 @@ h2, h3 {
     font-weight: 600;
 }
 
-.stButton > button:hover {
-    background-color: #55663c;
-}
-
-/* Metrics */
+/* METRICS */
 .stMetric {
     background-color: #ffffff;
     padding: 14px;
     border-radius: 10px;
     border: 1px solid #e5e7eb;
-    box-shadow: 0px 1px 4px rgba(0,0,0,0.05);
 }
 
 .stMetric label {
     color: #374151 !important;
-    font-weight: 500;
 }
 
 .stMetric div {
     color: #111827 !important;
-    font-size: 20px;
-    font-weight: 700;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# HEADER (NOW FLUSH TOP)
+# HEADER (TOP OF PAGE)
 # -------------------------
 st.markdown('<div class="topbar">Patient Cost Analysis Tool</div>', unsafe_allow_html=True)
 
