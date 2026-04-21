@@ -5,23 +5,39 @@ import re
 from datetime import date
 
 # -------------------------
-# PAGE CONFIG + STYLE
+# PAGE CONFIG
 # -------------------------
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
+# -------------------------
+# COOL MODERN UI THEME
+# -------------------------
 st.markdown("""
 <style>
-.main {
-    background-color: #f7f9fc;
+body {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
 }
+
 h1, h2, h3 {
-    color: #1f4e79;
+    color: #38bdf8;
 }
+
 .stMetric {
-    background-color: #ffffff;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #1e3a8a, #0ea5e9);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.stDataFrame {
+    background-color: #0f172a;
+}
+
+.block-container {
+    padding-top: 2rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -29,7 +45,7 @@ h1, h2, h3 {
 st.title("💊 Patient Treatment Cost Calculator")
 
 # -------------------------
-# Helper
+# HELPERS
 # -------------------------
 def extract_number(value):
     try:
@@ -42,15 +58,21 @@ def extract_number(value):
     except:
         return None
 
+def format_date_us(d):
+    try:
+        return d.strftime("%m/%d/%Y")
+    except:
+        return ""
+
 # -------------------------
-# Load Data
+# LOAD DATA
 # -------------------------
 try:
     df = pd.read_excel("drug_data.xlsx")
     df.columns = df.columns.str.strip()
     df = df.dropna(subset=["Drug_Name"])
 except Exception as e:
-    st.error(f"❌ Error loading Excel file: {e}")
+    st.error(f"Error loading file: {e}")
     st.stop()
 
 base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
@@ -84,7 +106,7 @@ with col3:
 # -------------------------
 # INSURANCE
 # -------------------------
-st.subheader("🏥 Insurance Information")
+st.subheader("🏥 Insurance")
 
 payer = st.selectbox("Primary Insurance", payer_columns)
 primary_coverage = st.slider("Primary Coverage %", 0, 100, 80) / 100
@@ -132,14 +154,12 @@ for i in range(int(num_drugs)):
     drug_entries.append({"drug": drug, "dose": dose})
 
 # -------------------------
-# CALCULATION
+# CALCULATE
 # -------------------------
 if st.button("Calculate"):
 
     total_cost = 0
-    total_allowed_primary = 0
-    total_allowed_secondary = 0
-
+    total_allowed = 0
     rows = []
 
     for entry in drug_entries:
@@ -147,50 +167,35 @@ if st.button("Calculate"):
 
         billing_unit = extract_number(drug_data["Billing_Unit"])
         cost = extract_number(drug_data["Cost_per_Unit"])
-        primary_allowable = extract_number(drug_data[payer])
+        allowable = extract_number(drug_data[payer])
         dose_val = extract_number(entry["dose"])
 
-        if None in [billing_unit, cost, primary_allowable, dose_val]:
-            st.error(f"❌ Invalid data for {entry['drug']}")
+        if None in [billing_unit, cost, allowable, dose_val]:
+            st.error(f"Invalid data for {entry['drug']}")
             st.stop()
 
         units = math.ceil(dose_val / billing_unit)
 
         drug_cost = units * cost
-        primary_allowed = units * primary_allowable
+        allowed = units * allowable
 
         total_cost += drug_cost
-        total_allowed_primary += primary_allowed
-
-        # Secondary logic
-        if has_secondary:
-            if secondary_text.strip() != "":
-                secondary_allowed = primary_allowed  # fallback
-            else:
-                secondary_allowable = extract_number(drug_data[secondary_dropdown])
-                secondary_allowed = units * secondary_allowable
-        else:
-            secondary_allowed = 0
-
-        total_allowed_secondary += secondary_allowed
+        total_allowed += allowed
 
         rows.append({
             "Drug": entry["drug"],
             "Units": units,
             "Cost": round(drug_cost, 2),
-            "Primary Allowed": round(primary_allowed, 2)
+            "Allowed": round(allowed, 2)
         })
 
-    primary_payment = total_allowed_primary * primary_coverage
-    remaining = total_allowed_primary - primary_payment
-
+    primary_payment = total_allowed * primary_coverage
+    remaining = total_allowed - primary_payment
     secondary_payment = remaining * secondary_coverage
     patient = remaining - secondary_payment + copay
 
-    # -------------------------
     # OUTPUT
-    # -------------------------
-    st.subheader("📊 Medication Breakdown")
+    st.subheader("📊 Breakdown")
     st.dataframe(pd.DataFrame(rows))
 
     st.subheader("💰 Financial Summary")
@@ -202,17 +207,15 @@ if st.button("Calculate"):
 
     st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
 
-    # -------------------------
-    # SUMMARY
-    # -------------------------
+    # SUMMARY WITH US DATE FORMAT
     st.subheader("🧾 Summary")
 
     st.write(f"""
-    Treatment Date: **{treatment_date.strftime('%m/%d/%Y')}**  
-    DOB: **{dob.strftime('%m/%d/%Y')}**
+    **Treatment Date:** {format_date_us(treatment_date)}  
+    **DOB:** {format_date_us(dob)}
 
-    Total Cost: **${total_cost:,.2f}**  
-    Primary Pays: **${primary_payment:,.2f}**  
-    Secondary Pays: **${secondary_payment:,.2f}**  
-    Patient Pays: **${patient:,.2f}**
+    **Total Cost:** ${total_cost:,.2f}  
+    **Primary Pays:** ${primary_payment:,.2f}  
+    **Secondary Pays:** ${secondary_payment:,.2f}  
+    **Patient Pays:** ${patient:,.2f}
     """)
