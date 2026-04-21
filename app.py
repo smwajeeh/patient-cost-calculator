@@ -10,53 +10,66 @@ from datetime import date
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# MODERN UI DESIGN
+# CLEAN PROFESSIONAL THEME
 # -------------------------
 st.markdown("""
 <style>
+
+/* Background */
 body {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
+    background-color: #F9FAFB;
 }
 
-.block-container {
-    padding-top: 2rem;
-}
-
-h1 {
-    color: #38bdf8;
-    font-weight: 700;
-}
-
-h2, h3 {
-    color: #e2e8f0;
-}
-
-.stTextInput, .stSelectbox, .stNumberInput {
-    background-color: #1e293b;
-}
-
-.stMetric {
-    background: rgba(255,255,255,0.05);
+/* Header */
+.header {
+    background-color: #6B7F4E;
     padding: 15px;
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-    text-align: center;
-    font-size: 18px;
-}
-
-.card {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    border-radius: 15px;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 22px;
+    font-weight: 600;
     margin-bottom: 20px;
 }
+
+/* Card */
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+/* Section titles */
+h2, h3 {
+    color: #111827;
+}
+
+/* Button */
+.stButton>button {
+    background-color: #6B7F4E;
+    color: white;
+    border-radius: 8px;
+    height: 45px;
+    font-weight: 600;
+}
+
+/* Metrics */
+.stMetric {
+    background-color: #F3F4F6;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-st.title("💊 Patient Treatment Cost Calculator")
+# -------------------------
+# HEADER
+# -------------------------
+st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
 # HELPERS
@@ -66,9 +79,7 @@ def extract_number(value):
         if pd.isna(value):
             return None
         number = re.findall(r"[\d\.]+", str(value))
-        if number:
-            return float(number[0])
-        return None
+        return float(number[0]) if number else None
     except:
         return None
 
@@ -89,14 +100,14 @@ base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
 payer_columns = sorted([col for col in df.columns if col not in base_columns])
 
 # -------------------------
-# PATIENT INFO
+# PATIENT INFO + INSURANCE (TOP ROW)
 # -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
-st.subheader("🧑 Patient Information")
+colA, colB = st.columns(2)
 
-col1, col2, col3 = st.columns(3)
+with colA:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("🧑 Patient Information")
 
-with col1:
     patient_name = st.text_input("Patient Name")
 
     dob = st.date_input(
@@ -105,52 +116,36 @@ with col1:
         max_value=date.today()
     )
 
-    st.caption(f"📅 Selected: {format_date_us(dob)}")
-
-with col2:
     doctor = st.text_input("Doctor Name")
 
     treatment_date = st.date_input("Date of Treatment", value=date.today())
 
-    st.caption(f"📅 Selected: {format_date_us(treatment_date)}")
-
-with col3:
     location = st.selectbox(
         "Clinic Location",
         ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"]
     )
 
-st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# -------------------------
-# INSURANCE
-# -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
-st.subheader("🏥 Insurance")
+with colB:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("🏥 Insurance")
 
-payer = st.selectbox("Primary Insurance", payer_columns)
-primary_coverage = st.slider("Primary Coverage %", 0, 100, 80) / 100
+    payer = st.selectbox("Primary Insurance", payer_columns)
+    primary_coverage = st.slider("Primary Coverage %", 0, 100, 80) / 100
 
-has_secondary = st.checkbox("Has Secondary Insurance")
+    has_secondary = st.checkbox("Has Secondary Insurance")
 
-secondary_coverage = 0
-secondary_dropdown = None
-secondary_text = ""
+    secondary_coverage = 0
 
-if has_secondary:
-    col1, col2 = st.columns(2)
-
-    with col1:
+    if has_secondary:
         secondary_dropdown = st.selectbox("Secondary Insurance", payer_columns)
-
-    with col2:
         secondary_text = st.text_input("Or Enter Secondary Insurance")
+        secondary_coverage = st.slider("Secondary Coverage %", 0, 100, 20) / 100
 
-    secondary_coverage = st.slider("Secondary Coverage %", 0, 100, 20) / 100
+    copay = st.number_input("Copay ($)", min_value=0.0)
 
-copay = st.number_input("Copay ($)", min_value=0.0)
-
-st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # MEDICATIONS
@@ -179,13 +174,12 @@ for i in range(int(num_drugs)):
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
-# CALCULATION
+# CALCULATE BUTTON
 # -------------------------
-if st.button("Calculate"):
+if st.button("Calculate Treatment Cost"):
 
     total_cost = 0
     total_allowed = 0
-    rows = []
 
     for entry in drug_entries:
         drug_data = df[df["Drug_Name"] == entry["drug"]].iloc[0]
@@ -197,22 +191,9 @@ if st.button("Calculate"):
 
         units = math.ceil(dose_val / billing_unit)
 
-        drug_cost = units * cost
-        allowed = units * allowable
+        total_cost += units * cost
+        total_allowed += units * allowable
 
-        total_cost += drug_cost
-        total_allowed += allowed
-
-        rows.append({
-            "Drug": entry["drug"],
-            "Units": units,
-            "Cost": round(drug_cost, 2),
-            "Allowed": round(allowed, 2)
-        })
-
-    # -------------------------
-    # INSURANCE LOGIC (UPDATED)
-    # -------------------------
     primary_payment = total_allowed * primary_coverage
     remaining = total_allowed - primary_payment
 
@@ -224,43 +205,16 @@ if st.button("Calculate"):
         patient = remaining + copay
 
     # -------------------------
-    # RESULTS
+    # RESULTS (DASHBOARD STYLE)
     # -------------------------
     st.subheader("💰 Financial Summary")
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Total Cost", f"${total_cost:,.2f}")
-    c2.metric("Primary Pays", f"${primary_payment:,.2f}")
-    c3.metric("Patient Pays", f"${patient:,.2f}")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Cost", f"${total_cost:,.2f}")
+    col2.metric("Primary Pays", f"${primary_payment:,.2f}")
+    col3.metric("Patient Pays", f"${patient:,.2f}")
 
     if has_secondary:
         st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
     else:
-        st.info(f"""
-        Patient doesn't have any secondary insurance.  
-        Patient is responsible to pay the remaining amount of **${remaining:,.2f}** plus any copay.
-        """)
-
-    st.subheader("🧾 Summary")
-
-    if has_secondary:
-        st.write(f"""
-        **Treatment Date:** {format_date_us(treatment_date)}  
-        **DOB:** {format_date_us(dob)}
-
-        **Total Cost:** ${total_cost:,.2f}  
-        **Primary Pays:** ${primary_payment:,.2f}  
-        **Secondary Pays:** ${secondary_payment:,.2f}  
-        **Patient Pays:** ${patient:,.2f}
-        """)
-    else:
-        st.write(f"""
-        **Treatment Date:** {format_date_us(treatment_date)}  
-        **DOB:** {format_date_us(dob)}
-
-        **Total Cost:** ${total_cost:,.2f}  
-        **Primary Pays:** ${primary_payment:,.2f}  
-
-        Patient doesn't have secondary insurance.  
-        Patient pays remaining **${remaining:,.2f}** + copay.
-        """)
+        st.info(f"Patient responsible for remaining: ${remaining:,.2f}")
