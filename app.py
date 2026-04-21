@@ -1,10 +1,25 @@
 import streamlit as st
 import pandas as pd
 import math
+import re
 
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 st.title("💊 Patient Treatment Cost Calculator")
+
+# -------------------------
+# Helper: Extract numeric value from messy strings
+# -------------------------
+def extract_number(value):
+    try:
+        if pd.isna(value):
+            return None
+        number = re.findall(r"[\d\.]+", str(value))
+        if number:
+            return float(number[0])
+        return None
+    except:
+        return None
 
 # -------------------------
 # Load Excel Data
@@ -121,41 +136,31 @@ if st.button("Calculate"):
         drug_data = drug_df.iloc[0]
 
         # -------------------------
-        # Safe conversions
+        # Extract & Validate Data
         # -------------------------
-        try:
-            billing_unit = float(drug_data["Billing_Unit"])
-        except:
-            st.error(f"❌ Invalid Billing Unit for {entry['drug']}")
+        billing_unit = extract_number(drug_data["Billing_Unit"])
+        cost_per_unit = extract_number(drug_data["Cost_per_Unit"])
+        allowable_per_unit = extract_number(drug_data[payer])
+        dose_value = extract_number(entry["dose"])
+
+        if billing_unit is None:
+            st.error(f"❌ Invalid Billing Unit for {entry['drug']} → {drug_data['Billing_Unit']}")
             st.stop()
 
-        try:
-            cost_per_unit = float(drug_data["Cost_per_Unit"])
-        except:
+        if cost_per_unit is None:
             st.error(f"❌ Invalid Cost for {entry['drug']}")
             st.stop()
 
-        try:
-            allowable_per_unit = float(drug_data[payer])
-        except:
+        if allowable_per_unit is None:
             st.error(f"❌ Invalid Allowable for {entry['drug']} under {payer}")
             st.stop()
 
-        try:
-            dose_value = float(entry["dose"])
-        except:
+        if dose_value is None or dose_value <= 0:
             st.error(f"❌ Invalid Dose for {entry['drug']}")
             st.stop()
 
-        # -------------------------
-        # Validation
-        # -------------------------
         if billing_unit <= 0:
             st.error(f"❌ Billing unit must be greater than 0 for {entry['drug']}")
-            st.stop()
-
-        if dose_value <= 0:
-            st.error(f"❌ Dose must be greater than 0 for {entry['drug']}")
             st.stop()
 
         # -------------------------
