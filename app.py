@@ -10,17 +10,24 @@ from datetime import date
 st.set_page_config(page_title="Treatment Cost Calculator", layout="centered")
 
 # -------------------------
-# CLEAN LIGHT THEME
+# FULL CSS (WHITE BAR REMOVED)
 # -------------------------
 st.markdown("""
 <style>
 
-/* REMOVE TOP WHITE SPACE */
+/* 🔥 REMOVE STREAMLIT HEADER + TOP SPACE */
+header {visibility: hidden; height: 0px;}
+[data-testid="stToolbar"] {display: none !important;}
+[data-testid="stDecoration"] {display: none !important;}
+[data-testid="stStatusWidget"] {display: none !important;}
+
 .block-container {
     padding-top: 0rem !important;
+    margin-top: 0rem !important;
 }
-div[data-testid="stAppViewContainer"] > .main {
-    padding-top: 0rem;
+
+section.main > div {
+    padding-top: 0rem !important;
 }
 
 /* Background */
@@ -28,11 +35,10 @@ body {
     background-color: #f5f5f5;
 }
 
-/* Header bar */
+/* Header bar (flush to top) */
 .topbar {
     background-color: #8b9a77;
     padding: 14px;
-    border-radius: 8px;
     text-align: center;
     color: white;
     font-weight: 600;
@@ -57,7 +63,7 @@ h2, h3 {
     color: #344e41;
 }
 
-/* Button */
+/* Buttons */
 .stButton > button {
     background-color: #6b7f4e;
     color: white;
@@ -94,7 +100,7 @@ h2, h3 {
 """, unsafe_allow_html=True)
 
 # -------------------------
-# HEADER
+# HEADER (NOW FLUSH TOP)
 # -------------------------
 st.markdown('<div class="topbar">Patient Cost Analysis Tool</div>', unsafe_allow_html=True)
 
