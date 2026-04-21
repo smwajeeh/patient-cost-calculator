@@ -10,36 +10,36 @@ from datetime import date
 st.set_page_config(page_title="Treatment Cost Calculator", layout="centered")
 
 # -------------------------
-# THEME (Based on your image)
+# CLEAN LIGHT THEME
 # -------------------------
 st.markdown("""
 <style>
 
 /* Background */
 body {
-    background-color: #f3f4f6;
+    background-color: #f5f5f5;
 }
 
-/* Top bar */
+/* Header bar */
 .topbar {
     background-color: #8b9a77;
-    padding: 15px;
-    border-radius: 10px;
+    padding: 14px;
+    border-radius: 8px;
     text-align: center;
     color: white;
     font-weight: 600;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
-/* Main Card */
-.main-card {
+/* Main card */
+.card {
     background-color: white;
     padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0px 4px 20px rgba(0,0,0,0.08);
+    border-radius: 14px;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
 }
 
-/* Headers */
+/* Titles */
 h1 {
     color: #2f3e46;
     text-align: center;
@@ -49,43 +49,37 @@ h2, h3 {
     color: #344e41;
 }
 
-/* Inputs */
-.stTextInput, .stNumberInput, .stSelectbox {
-    background-color: #f9fafb;
-}
-
-/* Button */
-.stButton>button {
+/* Buttons */
+.stButton > button {
     background-color: #6b7f4e;
     color: white;
-    border-radius: 10px;
-    height: 45px;
-    width: 100%;
-    font-weight: bold;
+    border-radius: 8px;
+    height: 42px;
+    font-weight: 600;
 }
 
-.stButton>button:hover {
+.stButton > button:hover {
     background-color: #55663c;
+}
+
+/* Inputs spacing */
+.stTextInput, .stNumberInput, .stSelectbox {
+    margin-bottom: 10px;
 }
 
 /* Metrics */
 .stMetric {
-    background-color: #f9fafb;
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-}
-
-/* Section spacing */
-.section {
-    margin-top: 25px;
+    background-color: #fafafa;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #eee;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# HEADER BAR
+# HEADER
 # -------------------------
 st.markdown('<div class="topbar">Patient Cost Analysis Tool</div>', unsafe_allow_html=True)
 
@@ -107,9 +101,7 @@ def extract_number(value):
         if pd.isna(value):
             return None
         number = re.findall(r"[\d\.]+", str(value))
-        if number:
-            return float(number[0])
-        return None
+        return float(number[0]) if number else None
     except:
         return None
 
@@ -119,7 +111,7 @@ def format_date_us(d):
 # -------------------------
 # MAIN CARD
 # -------------------------
-st.markdown('<div class="main-card">', unsafe_allow_html=True)
+st.markdown('<div class="card">', unsafe_allow_html=True)
 
 st.header("Treatment Cost Calculator")
 
@@ -153,8 +145,6 @@ primary_coverage = st.slider("Primary Coverage %", 0, 100, 80) / 100
 has_secondary = st.checkbox("Add Secondary Insurance")
 
 secondary_coverage = 0
-secondary_dropdown = None
-secondary_text = ""
 
 if has_secondary:
     col1, col2 = st.columns(2)
@@ -163,7 +153,7 @@ if has_secondary:
         secondary_dropdown = st.selectbox("Secondary Insurance", payer_columns)
 
     with col2:
-        secondary_text = st.text_input("Or type insurance")
+        secondary_text = st.text_input("Or enter insurance")
 
     secondary_coverage = st.slider("Secondary Coverage %", 0, 100, 20) / 100
 
@@ -223,7 +213,5 @@ if st.button("Calculate"):
     col3.metric("Patient Pays", f"${patient:,.2f}")
 
     st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
-
-    st.success("Calculation Complete")
 
 st.markdown('</div>', unsafe_allow_html=True)
