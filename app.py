@@ -210,12 +210,22 @@ if st.button("Calculate"):
             "Allowed": round(allowed, 2)
         })
 
+    # -------------------------
+    # INSURANCE LOGIC (UPDATED)
+    # -------------------------
     primary_payment = total_allowed * primary_coverage
     remaining = total_allowed - primary_payment
-    secondary_payment = remaining * secondary_coverage
-    patient = remaining - secondary_payment + copay
 
+    if has_secondary:
+        secondary_payment = remaining * secondary_coverage
+        patient = remaining - secondary_payment + copay
+    else:
+        secondary_payment = 0
+        patient = remaining + copay
+
+    # -------------------------
     # RESULTS
+    # -------------------------
     st.subheader("💰 Financial Summary")
 
     c1, c2, c3 = st.columns(3)
@@ -223,16 +233,34 @@ if st.button("Calculate"):
     c2.metric("Primary Pays", f"${primary_payment:,.2f}")
     c3.metric("Patient Pays", f"${patient:,.2f}")
 
-    st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
+    if has_secondary:
+        st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
+    else:
+        st.info(f"""
+        Patient doesn't have any secondary insurance.  
+        Patient is responsible to pay the remaining amount of **${remaining:,.2f}** plus any copay.
+        """)
 
     st.subheader("🧾 Summary")
 
-    st.write(f"""
-    **Treatment Date:** {format_date_us(treatment_date)}  
-    **DOB:** {format_date_us(dob)}
+    if has_secondary:
+        st.write(f"""
+        **Treatment Date:** {format_date_us(treatment_date)}  
+        **DOB:** {format_date_us(dob)}
 
-    **Total Cost:** ${total_cost:,.2f}  
-    **Primary Pays:** ${primary_payment:,.2f}  
-    **Secondary Pays:** ${secondary_payment:,.2f}  
-    **Patient Pays:** ${patient:,.2f}
-    """)
+        **Total Cost:** ${total_cost:,.2f}  
+        **Primary Pays:** ${primary_payment:,.2f}  
+        **Secondary Pays:** ${secondary_payment:,.2f}  
+        **Patient Pays:** ${patient:,.2f}
+        """)
+    else:
+        st.write(f"""
+        **Treatment Date:** {format_date_us(treatment_date)}  
+        **DOB:** {format_date_us(dob)}
+
+        **Total Cost:** ${total_cost:,.2f}  
+        **Primary Pays:** ${primary_payment:,.2f}  
+
+        Patient doesn't have secondary insurance.  
+        Patient pays remaining **${remaining:,.2f}** + copay.
+        """)
