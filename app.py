@@ -123,7 +123,7 @@ with col3:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
-# INSURANCE
+# INSURANCE (UPDATED)
 # -------------------------
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🏥 Insurance")
@@ -134,17 +134,26 @@ primary_coverage = st.slider("Primary Coverage %", 0, 100, 80) / 100
 has_secondary = st.checkbox("Has Secondary Insurance")
 
 secondary_coverage = 0
-secondary_dropdown = None
+secondary_dropdown = ""
 secondary_text = ""
 
 if has_secondary:
     col1, col2 = st.columns(2)
 
+    secondary_options = [""] + payer_columns + ["Other / Funding"]
+
     with col1:
-        secondary_dropdown = st.selectbox("Secondary Insurance", payer_columns)
+        secondary_dropdown = st.selectbox(
+            "Secondary Insurance",
+            secondary_options,
+            index=0
+        )
 
     with col2:
-        secondary_text = st.text_input("Or Enter Secondary Insurance")
+        secondary_text = st.text_input(
+            "Other / Funding",
+            disabled=(secondary_dropdown != "Other / Funding")
+        )
 
     secondary_coverage = st.slider("Secondary Coverage %", 0, 100, 20) / 100
 
@@ -183,9 +192,28 @@ st.markdown('</div>', unsafe_allow_html=True)
 # -------------------------
 if st.button("Calculate"):
 
+    # -------------------------
+    # VALIDATION (NEW)
+    # -------------------------
+    error = False
+
+    if has_secondary:
+        if secondary_dropdown == "":
+            st.error("Please select a Secondary Insurance option.")
+            error = True
+
+        if secondary_dropdown == "Other / Funding" and secondary_text.strip() == "":
+            st.error("Please enter details for Other / Funding.")
+            error = True
+
+    if error:
+        st.stop()
+
+    # -------------------------
+    # CALCULATIONS
+    # -------------------------
     total_cost = 0
     total_allowed = 0
-    rows = []
 
     for entry in drug_entries:
         drug_data = df[df["Drug_Name"] == entry["drug"]].iloc[0]
@@ -197,22 +225,9 @@ if st.button("Calculate"):
 
         units = math.ceil(dose_val / billing_unit)
 
-        drug_cost = units * cost
-        allowed = units * allowable
+        total_cost += units * cost
+        total_allowed += units * allowable
 
-        total_cost += drug_cost
-        total_allowed += allowed
-
-        rows.append({
-            "Drug": entry["drug"],
-            "Units": units,
-            "Cost": round(drug_cost, 2),
-            "Allowed": round(allowed, 2)
-        })
-
-    # -------------------------
-    # INSURANCE LOGIC (UPDATED)
-    # -------------------------
     primary_payment = total_allowed * primary_coverage
     remaining = total_allowed - primary_payment
 
@@ -239,28 +254,4 @@ if st.button("Calculate"):
         st.info(f"""
         Patient doesn't have any secondary insurance.  
         Patient is responsible to pay the remaining amount of **${remaining:,.2f}** plus any copay.
-        """)
-
-    st.subheader("🧾 Summary")
-
-    if has_secondary:
-        st.write(f"""
-        **Treatment Date:** {format_date_us(treatment_date)}  
-        **DOB:** {format_date_us(dob)}
-
-        **Total Cost:** ${total_cost:,.2f}  
-        **Primary Pays:** ${primary_payment:,.2f}  
-        **Secondary Pays:** ${secondary_payment:,.2f}  
-        **Patient Pays:** ${patient:,.2f}
-        """)
-    else:
-        st.write(f"""
-        **Treatment Date:** {format_date_us(treatment_date)}  
-        **DOB:** {format_date_us(dob)}
-
-        **Total Cost:** ${total_cost:,.2f}  
-        **Primary Pays:** ${primary_payment:,.2f}  
-
-        Patient doesn't have secondary insurance.  
-        Patient pays remaining **${remaining:,.2f}** + copay.
         """)
