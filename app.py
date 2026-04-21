@@ -15,12 +15,10 @@ st.set_page_config(page_title="Treatment Cost Calculator", layout="centered")
 st.markdown("""
 <style>
 
-/* Remove space under header */
+/* REMOVE TOP WHITE SPACE */
 .block-container {
     padding-top: 0rem !important;
 }
-
-/* Remove default top margin */
 div[data-testid="stAppViewContainer"] > .main {
     padding-top: 0rem;
 }
@@ -28,11 +26,6 @@ div[data-testid="stAppViewContainer"] > .main {
 /* Background */
 body {
     background-color: #f5f5f5;
-}
-
-/* Remove top gap */
-.block-container {
-    padding-top: 0rem !important;
 }
 
 /* Header bar */
@@ -43,7 +36,7 @@ body {
     text-align: center;
     color: white;
     font-weight: 600;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 /* Main card */
@@ -77,7 +70,7 @@ h2, h3 {
     background-color: #55663c;
 }
 
-/* Metrics FIX */
+/* Metrics */
 .stMetric {
     background-color: #ffffff;
     padding: 14px;
@@ -222,9 +215,6 @@ if st.button("Calculate"):
         total_cost += units * cost
         total_allowed += units * allowable
 
-    # -------------------------
-    # INSURANCE CALCULATION
-    # -------------------------
     primary_payment = total_allowed * primary_coverage
     remaining = total_allowed - primary_payment
 
@@ -235,9 +225,6 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient = remaining + copay
 
-    # -------------------------
-    # OUTPUT
-    # -------------------------
     st.subheader("Financial Summary")
 
     col1, col2, col3 = st.columns(3)
