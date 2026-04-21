@@ -4,67 +4,50 @@ import math
 import re
 from datetime import date
 
-# -------------------------
-# PAGE CONFIG
-# -------------------------
 st.set_page_config(page_title="Treatment Cost Calculator", layout="centered")
 
 # -------------------------
-# 🔥 FULL FIXED CSS
+# CLEAN CSS (NO HACKS)
 # -------------------------
 st.markdown("""
 <style>
 
-/* 🔥 REMOVE STREAMLIT HEADER + TOOLBAR */
-header {display: none !important;}
-[data-testid="stToolbar"],
-[data-testid="stDecoration"],
-[data-testid="stStatusWidget"] {
-    display: none !important;
-}
+/* Remove Streamlit header */
+header {display: none;}
 
-/* 🔥 REMOVE ALL TOP SPACE */
+/* Remove top spacing */
 .block-container {
     padding-top: 0rem !important;
-    margin-top: 0rem !important;
 }
 
-/* 🔥 KILL EMPTY FIRST BLOCK (THIS WAS THE PROBLEM) */
-section.main > div:first-child {
-    padding-top: 0rem !important;
-    margin-top: 0rem !important;
+/* Page background */
+body {
+    background-color: #0b1220;
 }
 
-/* 🔥 REMOVE HIDDEN EMPTY DIV */
-[data-testid="stVerticalBlock"] > div:first-child:empty {
-    display: none !important;
-}
-
-/* FORCE PAGE TO TOP */
-html, body, [data-testid="stAppViewContainer"] {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-/* HEADER (NOW PERFECTLY FLUSH) */
+/* Header bar */
 .topbar {
     background-color: #8b9a77;
     padding: 14px;
     text-align: center;
     color: white;
     font-weight: 600;
-    margin: 0 !important;
 }
 
-/* MAIN CARD */
+/* Card (FIXED) */
 .card {
     background-color: white;
-    padding: 30px;
+    padding: 20px 30px 30px 30px;  /* reduced top padding */
     border-radius: 14px;
-    box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+    margin-top: 10px;  /* small gap under header */
 }
 
-/* BUTTON */
+/* REMOVE BIG HEADER GAP */
+h1 {
+    margin-top: 0px !important;
+}
+
+/* Buttons */
 .stButton > button {
     background-color: #6b7f4e;
     color: white;
@@ -73,7 +56,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-weight: 600;
 }
 
-/* METRICS */
+/* Metrics */
 .stMetric {
     background-color: #ffffff;
     padding: 14px;
@@ -81,19 +64,11 @@ html, body, [data-testid="stAppViewContainer"] {
     border: 1px solid #e5e7eb;
 }
 
-.stMetric label {
-    color: #374151 !important;
-}
-
-.stMetric div {
-    color: #111827 !important;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# HEADER (TOP OF PAGE)
+# HEADER
 # -------------------------
 st.markdown('<div class="topbar">Patient Cost Analysis Tool</div>', unsafe_allow_html=True)
 
@@ -123,121 +98,122 @@ def format_date_us(d):
     return d.strftime("%m-%d-%Y")
 
 # -------------------------
-# MAIN CARD
+# CARD START (FIXED POSITION)
 # -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
+with st.container():
+    st.markdown('<div class="card">', unsafe_allow_html=True)
 
-st.header("Treatment Cost Calculator")
+    st.header("Treatment Cost Calculator")
 
-# -------------------------
-# PATIENT INFO
-# -------------------------
-st.subheader("Patient Information")
+    # -------------------------
+    # PATIENT INFO
+    # -------------------------
+    st.subheader("Patient Information")
 
-col1, col2 = st.columns(2)
-
-with col1:
-    patient_name = st.text_input("Patient Name")
-    dob = st.date_input("Date of Birth", min_value=date.today().replace(year=date.today().year - 100))
-
-with col2:
-    doctor = st.text_input("Doctor Name")
-    treatment_date = st.date_input("Date of Treatment")
-
-st.caption(f"DOB: {format_date_us(dob)} | Treatment: {format_date_us(treatment_date)}")
-
-location = st.selectbox("Clinic Location", ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"])
-
-# -------------------------
-# INSURANCE
-# -------------------------
-st.subheader("Insurance")
-
-payer = st.selectbox("Primary Insurance", payer_columns)
-primary_coverage = st.slider("Primary Coverage %", 0, 100, 80) / 100
-
-has_secondary = st.checkbox("Add Secondary Insurance")
-
-secondary_coverage = 0
-
-if has_secondary:
     col1, col2 = st.columns(2)
 
     with col1:
-        secondary_dropdown = st.selectbox("Secondary Insurance", payer_columns)
+        patient_name = st.text_input("Patient Name")
+        dob = st.date_input("Date of Birth", min_value=date.today().replace(year=date.today().year - 100))
 
     with col2:
-        secondary_text = st.text_input("Or enter insurance")
+        doctor = st.text_input("Doctor Name")
+        treatment_date = st.date_input("Date of Treatment")
 
-    secondary_coverage = st.slider("Secondary Coverage %", 0, 100, 20) / 100
+    st.caption(f"DOB: {format_date_us(dob)} | Treatment: {format_date_us(treatment_date)}")
 
-copay = st.number_input("Copay ($)", min_value=0.0)
+    location = st.selectbox("Clinic Location", ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"])
 
-# -------------------------
-# MEDICATIONS
-# -------------------------
-st.subheader("Medications")
+    # -------------------------
+    # INSURANCE
+    # -------------------------
+    st.subheader("Insurance")
 
-num_drugs = st.number_input("Number of Drugs", 1, 10, 1)
+    payer = st.selectbox("Primary Insurance", payer_columns)
+    primary_coverage = st.slider("Primary Coverage %", 0, 100, 80) / 100
 
-drug_entries = []
+    has_secondary = st.checkbox("Add Secondary Insurance")
 
-for i in range(int(num_drugs)):
-    col1, col2 = st.columns(2)
-
-    with col1:
-        drug = st.selectbox(f"Drug {i+1}", df["Drug_Name"].unique(), key=f"d{i}")
-
-    with col2:
-        dose = st.number_input(f"Dose {i+1}", min_value=0.0, key=f"dose{i}")
-
-    drug_entries.append({"drug": drug, "dose": dose})
-
-# -------------------------
-# CALCULATE
-# -------------------------
-if st.button("Calculate"):
-
-    total_cost = 0
-    total_allowed = 0
-
-    for entry in drug_entries:
-        drug_data = df[df["Drug_Name"] == entry["drug"]].iloc[0]
-
-        billing_unit = extract_number(drug_data["Billing_Unit"])
-        cost = extract_number(drug_data["Cost_per_Unit"])
-        allowable = extract_number(drug_data[payer])
-        dose_val = extract_number(entry["dose"])
-
-        units = math.ceil(dose_val / billing_unit)
-
-        total_cost += units * cost
-        total_allowed += units * allowable
-
-    primary_payment = total_allowed * primary_coverage
-    remaining = total_allowed - primary_payment
+    secondary_coverage = 0
 
     if has_secondary:
-        secondary_payment = remaining * secondary_coverage
-        patient = remaining - secondary_payment + copay
-    else:
-        secondary_payment = 0
-        patient = remaining + copay
+        col1, col2 = st.columns(2)
 
-    st.subheader("Financial Summary")
+        with col1:
+            secondary_dropdown = st.selectbox("Secondary Insurance", payer_columns)
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Cost", f"${total_cost:,.2f}")
-    col2.metric("Primary Pays", f"${primary_payment:,.2f}")
-    col3.metric("Patient Pays", f"${patient:,.2f}")
+        with col2:
+            secondary_text = st.text_input("Or enter insurance")
 
-    if has_secondary:
-        st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
-    else:
-        st.info(f"""
-        Patient doesn't have any secondary insurance.
+        secondary_coverage = st.slider("Secondary Coverage %", 0, 100, 20) / 100
 
-        Patient is responsible to pay the remaining amount of **${remaining:,.2f}** plus any copay.
-        """)
+    copay = st.number_input("Copay ($)", min_value=0.0)
 
-st.markdown('</div>', unsafe_allow_html=True)
+    # -------------------------
+    # MEDICATIONS
+    # -------------------------
+    st.subheader("Medications")
+
+    num_drugs = st.number_input("Number of Drugs", 1, 10, 1)
+
+    drug_entries = []
+
+    for i in range(int(num_drugs)):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            drug = st.selectbox(f"Drug {i+1}", df["Drug_Name"].unique(), key=f"d{i}")
+
+        with col2:
+            dose = st.number_input(f"Dose {i+1}", min_value=0.0, key=f"dose{i}")
+
+        drug_entries.append({"drug": drug, "dose": dose})
+
+    # -------------------------
+    # CALCULATE
+    # -------------------------
+    if st.button("Calculate"):
+
+        total_cost = 0
+        total_allowed = 0
+
+        for entry in drug_entries:
+            drug_data = df[df["Drug_Name"] == entry["drug"]].iloc[0]
+
+            billing_unit = extract_number(drug_data["Billing_Unit"])
+            cost = extract_number(drug_data["Cost_per_Unit"])
+            allowable = extract_number(drug_data[payer])
+            dose_val = extract_number(entry["dose"])
+
+            units = math.ceil(dose_val / billing_unit)
+
+            total_cost += units * cost
+            total_allowed += units * allowable
+
+        primary_payment = total_allowed * primary_coverage
+        remaining = total_allowed - primary_payment
+
+        if has_secondary:
+            secondary_payment = remaining * secondary_coverage
+            patient = remaining - secondary_payment + copay
+        else:
+            secondary_payment = 0
+            patient = remaining + copay
+
+        st.subheader("Financial Summary")
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Cost", f"${total_cost:,.2f}")
+        col2.metric("Primary Pays", f"${primary_payment:,.2f}")
+        col3.metric("Patient Pays", f"${patient:,.2f}")
+
+        if has_secondary:
+            st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
+        else:
+            st.info(f"""
+            Patient doesn't have any secondary insurance.
+
+            Patient is responsible to pay the remaining amount of **${remaining:,.2f}** plus any copay.
+            """)
+
+    st.markdown('</div>', unsafe_allow_html=True)
