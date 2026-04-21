@@ -63,10 +63,23 @@ h2, h3 {
 
 /* Metrics */
 .stMetric {
-    background-color: #fafafa;
+    background-color: #f9fafb;
     padding: 12px;
     border-radius: 8px;
-    border: 1px solid #eee;
+    border: 1px solid #e5e7eb;
+}
+
+/* Metric label */
+.stMetric label {
+    color: #374151 !important;
+    font-weight: 500;
+}
+
+/* Metric value */
+.stMetric div {
+    color: #111827 !important;
+    font-size: 20px;
+    font-weight: 700;
 }
 
 </style>
