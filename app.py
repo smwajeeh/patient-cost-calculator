@@ -50,11 +50,8 @@ st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', 
 # HELPERS
 # -------------------------
 def extract_number(value):
-    try:
-        number = re.findall(r"[\d\.]+", str(value))
-        return float(number[0]) if number else None
-    except:
-        return None
+    number = re.findall(r"[\d\.]+", str(value))
+    return float(number[0]) if number else None
 
 def convert_to_mg(dose, unit):
     if unit == "mcgs":
@@ -70,7 +67,6 @@ def generate_pdf(data):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
-
     content = []
 
     content.append(Paragraph("Patient Treatment Cost Report", styles["Title"]))
@@ -96,6 +92,7 @@ payer_columns = sorted([c for c in df.columns if c not in base_columns])
 # -------------------------
 # PATIENT INFO
 # -------------------------
+st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🧑 Patient Information")
 
 providers = sorted([
@@ -117,9 +114,12 @@ with col2:
 with col3:
     location = st.selectbox("Clinic Location", ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"])
 
+st.markdown('</div>', unsafe_allow_html=True)
+
 # -------------------------
 # INSURANCE
 # -------------------------
+st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🏥 Insurance")
 
 payer = st.selectbox("Primary Insurance", payer_columns)
@@ -139,9 +139,12 @@ if has_secondary:
 
 copay = st.number_input("Copay", min_value=0, step=1)
 
+st.markdown('</div>', unsafe_allow_html=True)
+
 # -------------------------
 # MEDICATIONS
 # -------------------------
+st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("💉 Medications")
 
 if "med_count" not in st.session_state:
@@ -158,7 +161,6 @@ if col_remove.button("➖ Remove Medication") and st.session_state.med_count > 1
 drug_entries = []
 
 for i in range(st.session_state.med_count):
-
     title = "Medication" if st.session_state.med_count == 1 else f"Medication {i+1}"
     st.subheader(title)
 
@@ -169,6 +171,8 @@ for i in range(st.session_state.med_count):
     unit = col3.selectbox("Units", ["mgs", "mcgs", "grams"], key=f"u{i}")
 
     drug_entries.append({"drug": drug, "dose": dose, "unit": unit})
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # CALCULATE
@@ -214,23 +218,45 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient_payment = remaining + copay
 
-    # DISPLAY
+    # -------------------------
+    # FINANCIAL SUMMARY
+    # -------------------------
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("💰 Financial Summary")
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Cost", f"${total_cost:,.2f}")
-    col2.metric("Primary Pays", f"${primary_payment:,.2f}")
-    col3.metric("Patient Pays", f"${patient_payment:,.2f}")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Total Cost", f"${total_cost:,.2f}")
+    c2.metric("Primary Pays", f"${primary_payment:,.2f}")
+    c3.metric("Patient Pays", f"${patient_payment:,.2f}")
 
     if has_secondary:
         st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
 
+    st.markdown('</div>', unsafe_allow_html=True)
+
     # -------------------------
-    # SUMMARY
+    # SUMMARY (RESTORED STYLE)
     # -------------------------
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("🧾 Summary")
 
-    summary_data = [
+    st.markdown(f"""
+    **Provider:** {provider}  
+    **Treatment Date:** {format_date_us(treatment_date)}  
+    **Date of Birth:** {format_date_us(dob)}  
+
+    **Total Cost:** ${total_cost:,.2f}  
+    **Primary Insurance Pays:** ${primary_payment:,.2f}  
+    **Secondary Insurance Pays:** ${secondary_payment:,.2f}  
+    **Patient Responsibility:** ${patient_payment:,.2f}
+    """)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # -------------------------
+    # PDF DOWNLOAD
+    # -------------------------
+    pdf_data = [
         f"Provider: {provider}",
         f"Treatment Date: {format_date_us(treatment_date)}",
         f"DOB: {format_date_us(dob)}",
@@ -240,13 +266,7 @@ if st.button("Calculate"):
         f"Patient Pays: ${patient_payment:,.2f}"
     ]
 
-    for line in summary_data:
-        st.write(line)
-
-    # -------------------------
-    # PDF DOWNLOAD
-    # -------------------------
-    pdf_file = generate_pdf(summary_data)
+    pdf_file = generate_pdf(pdf_data)
 
     st.download_button(
         label="📄 Download PDF Report",
