@@ -7,6 +7,49 @@ from datetime import date
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
+# STYLE (RESTORED CLEAN LOOK)
+# -------------------------
+st.markdown("""
+<style>
+body {
+    background-color: #F9FAFB;
+}
+
+.header {
+    background-color: #6B7F4E;
+    padding: 15px;
+    border-radius: 8px;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    margin-bottom: 20px;
+}
+
+.stButton>button {
+    background-color: #6B7F4E;
+    color: white;
+    border-radius: 8px;
+    height: 45px;
+    font-weight: 600;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# HEADER (RESTORED EXACT TEXT)
+# -------------------------
+st.markdown('<div class="header">💊 Patient Treast Cost Calculator</div>', unsafe_allow_html=True)
+
+# -------------------------
 # HELPERS
 # -------------------------
 def extract_number(value):
@@ -38,7 +81,8 @@ payer_columns = sorted([c for c in df.columns if c not in base_columns])
 # -------------------------
 # PATIENT INFO
 # -------------------------
-st.header("Patient Information")
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.subheader("🧑 Patient Information")
 
 providers = sorted([
     "Navneet Mittal MD",
@@ -46,16 +90,26 @@ providers = sorted([
     "Syed Raza MD"
 ])
 
-patient_name = st.text_input("Patient Name")
-provider = st.selectbox("Provider", providers)
-dob = st.date_input("DOB", min_value=date.today().replace(year=date.today().year - 100))
-treatment_date = st.date_input("Treatment Date", value=date.today())
-location = st.selectbox("Location", ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"])
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    patient_name = st.text_input("Patient Name")
+    dob = st.date_input("Date of Birth", min_value=date.today().replace(year=date.today().year - 100))
+
+with col2:
+    provider = st.selectbox("Provider", providers)
+    treatment_date = st.date_input("Date of Treatment", value=date.today())
+
+with col3:
+    location = st.selectbox("Clinic Location", ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"])
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # INSURANCE
 # -------------------------
-st.header("Insurance")
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.subheader("🏥 Insurance")
 
 payer = st.selectbox("Primary Insurance", payer_columns)
 primary_pct = st.slider("Primary Coverage %", 0, 100, 80)
@@ -63,6 +117,7 @@ primary_pct = st.slider("Primary Coverage %", 0, 100, 80)
 has_secondary = st.checkbox("Has Secondary Insurance")
 
 secondary_selected = None
+secondary_text = ""
 
 if has_secondary:
     options = ["Select"] + payer_columns + ["Other / Funding"]
@@ -73,10 +128,13 @@ if has_secondary:
 
 copay = st.number_input("Copay", min_value=0, step=1)
 
+st.markdown('</div>', unsafe_allow_html=True)
+
 # -------------------------
 # MEDICATIONS
 # -------------------------
-st.header("Medications")
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.subheader("💉 Medications")
 
 if "med_count" not in st.session_state:
     st.session_state.med_count = 1
@@ -99,17 +157,19 @@ for i in range(st.session_state.med_count):
     col1, col2, col3 = st.columns(3)
 
     drug = col1.selectbox("Drug", df["Drug_Name"].unique(), key=f"d{i}")
-    dose = col2.number_input("Dose", min_value=0.0, key=f"dose{i}")  # decimals allowed
+    dose = col2.number_input("Dose", min_value=0.0, key=f"dose{i}")
     unit = col3.selectbox("Units", ["mgs", "mcgs", "grams"], key=f"u{i}")
 
     drug_entries.append({"drug": drug, "dose": dose, "unit": unit})
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # CALCULATE
 # -------------------------
 if st.button("Calculate"):
 
-    # -------- VALIDATION --------
+    # VALIDATION
     if not patient_name:
         st.error("Patient Name is required")
         st.stop()
@@ -128,7 +188,7 @@ if st.button("Calculate"):
             st.error("Dose cannot be zero")
             st.stop()
 
-    # -------- CALCULATION --------
+    # CALCULATION
     total_cost = 0
     total_allowed = 0
 
@@ -140,7 +200,6 @@ if st.button("Calculate"):
         allowable = extract_number(data[payer])
 
         dose_mg = convert_to_mg(entry["dose"], entry["unit"])
-
         units = math.ceil(dose_mg / billing_unit)
 
         total_cost += units * cost
@@ -156,27 +215,37 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient_payment = remaining + copay
 
-    # -------- OUTPUT --------
-    st.header("Financial Summary")
+    # -------------------------
+    # FINANCIAL SUMMARY
+    # -------------------------
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("💰 Financial Summary")
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Total Cost", f"${total_cost:,.2f}")
-    c2.metric("Primary Pays", f"${primary_payment:,.2f}")
-    c3.metric("Patient Pays", f"${patient_payment:,.2f}")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Cost", f"${total_cost:,.2f}")
+    col2.metric("Primary Pays", f"${primary_payment:,.2f}")
+    col3.metric("Patient Pays", f"${patient_payment:,.2f}")
 
     if has_secondary:
         st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
 
-    # -------- SUMMARY --------
-    st.header("Summary")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # -------------------------
+    # SUMMARY
+    # -------------------------
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("🧾 Summary")
 
     st.write(f"""
-    Provider: {provider}  
-    Treatment Date: {format_date_us(treatment_date)}  
-    DOB: {format_date_us(dob)}  
+    **Provider:** {provider}  
+    **Treatment Date:** {format_date_us(treatment_date)}  
+    **DOB:** {format_date_us(dob)}  
 
-    Total Cost: ${total_cost:,.2f}  
-    Primary Pays: ${primary_payment:,.2f}  
-    Secondary Pays: ${secondary_payment:,.2f}  
-    Patient Pays: ${patient_payment:,.2f}
+    **Total Cost:** ${total_cost:,.2f}  
+    **Primary Pays:** ${primary_payment:,.2f}  
+    **Secondary Pays:** ${secondary_payment:,.2f}  
+    **Patient Pays:** ${patient_payment:,.2f}
     """)
+
+    st.markdown('</div>', unsafe_allow_html=True)
