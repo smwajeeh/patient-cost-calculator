@@ -10,7 +10,7 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (ORIGINAL CLEAN - NO BACKGROUND IMAGE)
+# STYLE
 # -------------------------
 st.markdown("""
 <style>
@@ -36,9 +36,6 @@ body { background-color: #F9FAFB; }
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# HEADER
-# -------------------------
 st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
@@ -46,7 +43,7 @@ st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', 
 # -------------------------
 def extract_number(value):
     number = re.findall(r"[\d\.]+", str(value))
-    return float(number[0]) if number else None
+    return float(number[0]) if number else 0
 
 def convert_to_mg(dose, unit):
     if unit == "mcgs":
@@ -84,6 +81,9 @@ df.columns = df.columns.str.strip()
 base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
 payer_columns = sorted([c for c in df.columns if c not in base_columns])
 
+# Normalize drug names once (IMPORTANT)
+df["Drug_Name_Clean"] = df["Drug_Name"].astype(str).str.strip().str.lower()
+
 # -------------------------
 # PATIENT INFO
 # -------------------------
@@ -116,7 +116,6 @@ st.subheader("🏥 Insurance")
 payer = st.selectbox("Primary Insurance", payer_columns)
 primary_pct = st.slider("Primary Coverage %", 0, 100, 80)
 
-# Copay first (final structure)
 copay = st.number_input("Copay", min_value=0, step=1)
 
 has_secondary = st.checkbox("Has Secondary Insurance")
@@ -182,18 +181,36 @@ if st.button("Calculate"):
     total_cost = 0
     total_allowed = 0
 
+    missing_drugs = []
+
     for entry in drug_entries:
-        data = df[df["Drug_Name"] == entry["drug"]].iloc[0]
+        drug_clean = str(entry["drug"]).strip().lower()
+
+        filtered = df[df["Drug_Name_Clean"] == drug_clean]
+
+        if filtered.empty:
+            missing_drugs.append(entry["drug"])
+            continue  # skip instead of crashing
+
+        data = filtered.iloc[0]
 
         billing_unit = extract_number(data["Billing_Unit"])
         cost = extract_number(data["Cost_per_Unit"])
         allowable = extract_number(data[payer])
+
+        if billing_unit == 0:
+            st.warning(f"Invalid billing unit for {entry['drug']}. Skipping.")
+            continue
 
         dose_mg = convert_to_mg(entry["dose"], entry["unit"])
         units = math.ceil(dose_mg / billing_unit)
 
         total_cost += units * cost
         total_allowed += units * allowable
+
+    # Show warning only (no crash)
+    if missing_drugs:
+        st.warning(f"Some drugs were not found and skipped: {', '.join(missing_drugs)}")
 
     primary_payment = total_allowed * (primary_pct / 100)
     remaining = total_allowed - primary_payment
