@@ -10,14 +10,28 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE
+# STYLE (GLASS BACKGROUND APPLIED)
 # -------------------------
 st.markdown("""
 <style>
-body { background-color: #F9FAFB; }
 
+/* Background Gradient */
+.stApp {
+    background: linear-gradient(135deg, #e8f0ec, #f5f7fa);
+}
+
+/* Glass effect containers */
+section.main > div {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+/* Header */
 .header {
-    background-color: #6B7F4E;
+    background: rgba(107, 127, 78, 0.9);
+    backdrop-filter: blur(6px);
     padding: 15px;
     border-radius: 8px;
     color: white;
@@ -26,6 +40,7 @@ body { background-color: #F9FAFB; }
     margin-bottom: 20px;
 }
 
+/* Buttons */
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
@@ -33,6 +48,20 @@ body { background-color: #F9FAFB; }
     height: 45px;
     font-weight: 600;
 }
+
+/* Inputs */
+.stTextInput, .stSelectbox, .stNumberInput {
+    background-color: rgba(255,255,255,0.8);
+    border-radius: 6px;
+}
+
+/* Metrics */
+.stMetric {
+    background: rgba(255,255,255,0.6);
+    padding: 10px;
+    border-radius: 10px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -201,7 +230,6 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient_payment = remaining + copay
 
-    # FINANCIAL SUMMARY
     st.subheader("💰 Financial Summary")
 
     c1, c2, c3 = st.columns(3)
@@ -212,7 +240,6 @@ if st.button("Calculate"):
     if has_secondary:
         st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
 
-    # SUMMARY
     st.subheader("🧾 Summary")
 
     st.markdown(f"""
@@ -226,7 +253,6 @@ if st.button("Calculate"):
     **Patient Responsibility:** ${patient_payment:,.2f}
     """)
 
-    # PDF
     pdf_data = [
         f"Provider: {provider}",
         f"Treatment Date: {format_date_us(treatment_date)}",
