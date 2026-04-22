@@ -36,7 +36,6 @@ body { background-color: #F9FAFB; }
 </style>
 """, unsafe_allow_html=True)
 
-# ✅ FIXED TITLE HERE
 st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
@@ -114,6 +113,9 @@ st.subheader("🏥 Insurance")
 payer = st.selectbox("Primary Insurance", payer_columns)
 primary_pct = st.slider("Primary Coverage %", 0, 100, 80)
 
+# ✅ MOVED COPAY HERE
+copay = st.number_input("Copay", min_value=0, step=1)
+
 has_secondary = st.checkbox("Has Secondary Insurance")
 
 secondary_selected = None
@@ -125,8 +127,6 @@ if has_secondary:
 
     if secondary_selected == "Other / Funding":
         secondary_text = st.text_input("Other / Funding Details")
-
-copay = st.number_input("Copay", min_value=0, step=1)
 
 # -------------------------
 # MEDICATIONS
