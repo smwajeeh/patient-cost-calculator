@@ -48,7 +48,7 @@ def extract_number(value):
 def convert_to_mg(dose, unit):
     if unit == "mcg":
         return dose / 1000
-    return dose  # mg and units treated as-is
+    return dose
 
 def format_date_us(d):
     return d.strftime("%m-%d-%Y")
@@ -98,7 +98,11 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     patient_name = st.text_input("Patient Name")
-    dob = st.date_input("Date of Birth", min_value=date.today().replace(year=date.today().year - 100))
+    dob = st.date_input(
+        "Date of Birth",
+        min_value=date.today().replace(year=date.today().year - 100),
+        max_value=date.today()
+    )
 
 with col2:
     provider = st.selectbox("Provider", providers)
@@ -137,13 +141,22 @@ st.subheader("💉 Medications")
 if "med_count" not in st.session_state:
     st.session_state.med_count = 1
 
-col_add, col_remove = st.columns(2)
+col_add, col_remove, col_reset = st.columns(3)
 
 if col_add.button("➕ Add Medication"):
     st.session_state.med_count += 1
 
 if col_remove.button("➖ Remove Medication") and st.session_state.med_count > 1:
     st.session_state.med_count -= 1
+
+# ✅ RESET BUTTON
+if col_reset.button("🔄 Reset Medications"):
+    st.session_state.med_count = 1
+    # clear all stored values
+    for key in list(st.session_state.keys()):
+        if key.startswith("d") or key.startswith("dose") or key.startswith("u"):
+            del st.session_state[key]
+    st.rerun()
 
 drug_entries = []
 
@@ -168,6 +181,10 @@ if st.button("Calculate"):
         st.error("Patient Name is required")
         st.stop()
 
+    if dob >= date.today():
+        st.error("Date of Birth must be in the past.")
+        st.stop()
+
     for entry in drug_entries:
         if entry["drug"] == "Select Drug":
             st.error("Please select a drug for all medications.")
@@ -188,7 +205,6 @@ if st.button("Calculate"):
 
     total_cost = 0
     total_allowed = 0
-
     missing_drugs = []
 
     for entry in drug_entries:
@@ -251,22 +267,3 @@ if st.button("Calculate"):
     **Secondary Insurance Pays:** ${secondary_payment:,.2f}  
     **Patient Responsibility:** ${patient_payment:,.2f}
     """)
-
-    pdf_data = [
-        f"Provider: {provider}",
-        f"Treatment Date: {format_date_us(treatment_date)}",
-        f"DOB: {format_date_us(dob)}",
-        f"Total Cost: ${total_cost:,.2f}",
-        f"Primary Pays: ${primary_payment:,.2f}",
-        f"Secondary Pays: ${secondary_payment:,.2f}",
-        f"Patient Pays: ${patient_payment:,.2f}"
-    ]
-
-    pdf_file = generate_pdf(pdf_data)
-
-    st.download_button(
-        label="📄 Download PDF Report",
-        data=pdf_file,
-        file_name="patient_cost_report.pdf",
-        mime="application/pdf"
-    )
