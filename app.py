@@ -44,7 +44,7 @@ body { background-color: #F9FAFB; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header">💊 Patient Treast Cost Calculator</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
 # HELPERS
