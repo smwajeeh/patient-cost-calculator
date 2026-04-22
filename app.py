@@ -81,7 +81,7 @@ df.columns = df.columns.str.strip()
 base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
 payer_columns = sorted([c for c in df.columns if c not in base_columns])
 
-# Normalize drug names once (IMPORTANT)
+# Normalize drug names
 df["Drug_Name_Clean"] = df["Drug_Name"].astype(str).str.strip().str.lower()
 
 # -------------------------
@@ -154,7 +154,7 @@ for i in range(st.session_state.med_count):
 
     col1, col2, col3 = st.columns(3)
 
-    drug = col1.selectbox("Drug", df["Drug_Name"].unique(), key=f"d{i}")
+    drug = col1.selectbox("Drug", df["Drug_Name"].dropna().unique(), key=f"d{i}")
     dose = col2.number_input("Dose", min_value=0.0, key=f"dose{i}")
     unit = col3.selectbox("Units", ["mgs", "mcgs", "grams"], key=f"u{i}")
 
@@ -190,7 +190,7 @@ if st.button("Calculate"):
 
         if filtered.empty:
             missing_drugs.append(entry["drug"])
-            continue  # skip instead of crashing
+            continue
 
         data = filtered.iloc[0]
 
@@ -208,9 +208,11 @@ if st.button("Calculate"):
         total_cost += units * cost
         total_allowed += units * allowable
 
-    # Show warning only (no crash)
-    if missing_drugs:
-        st.warning(f"Some drugs were not found and skipped: {', '.join(missing_drugs)}")
+    # ✅ SAFE WARNING FIX
+    clean_missing = [str(d) for d in missing_drugs if pd.notna(d) and str(d).strip() != ""]
+
+    if clean_missing:
+        st.warning("Some drugs were not found and skipped: " + ", ".join(clean_missing))
 
     primary_payment = total_allowed * (primary_pct / 100)
     remaining = total_allowed - primary_payment
