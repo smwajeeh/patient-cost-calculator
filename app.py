@@ -94,7 +94,7 @@ payer_columns = sorted([c for c in df.columns if c not in base_columns])
 # -------------------------
 # PATIENT INFO
 # -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
+
 st.subheader("🧑 Patient Information")
 
 providers = sorted([
