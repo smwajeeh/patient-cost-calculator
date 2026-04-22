@@ -121,7 +121,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 # -------------------------
 # INSURANCE
 # -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
+
 st.subheader("🏥 Insurance")
 
 payer = st.selectbox("Primary Insurance", payer_columns)
@@ -146,7 +146,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 # -------------------------
 # MEDICATIONS
 # -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
+
 st.subheader("💉 Medications")
 
 if "med_count" not in st.session_state:
