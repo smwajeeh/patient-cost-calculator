@@ -149,13 +149,16 @@ if col_add.button("➕ Add Medication"):
 if col_remove.button("➖ Remove Medication") and st.session_state.med_count > 1:
     st.session_state.med_count -= 1
 
-# ✅ RESET BUTTON
+# ✅ FIXED RESET
 if col_reset.button("🔄 Reset Medications"):
     st.session_state.med_count = 1
-    # clear all stored values
-    for key in list(st.session_state.keys()):
-        if key.startswith("d") or key.startswith("dose") or key.startswith("u"):
-            del st.session_state[key]
+
+    # Explicitly reset all medication fields
+    for i in range(10):  # supports up to 10 meds safely
+        st.session_state[f"d{i}"] = "Select Drug"
+        st.session_state[f"dose{i}"] = 0.0
+        st.session_state[f"u{i}"] = "mg"
+
     st.rerun()
 
 drug_entries = []
