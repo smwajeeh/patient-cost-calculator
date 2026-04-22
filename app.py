@@ -10,28 +10,14 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (GLASS BACKGROUND APPLIED)
+# STYLE (ORIGINAL CLEAN)
 # -------------------------
 st.markdown("""
 <style>
+body { background-color: #F9FAFB; }
 
-/* Background Gradient */
-.stApp {
-    background: linear-gradient(135deg, #e8f0ec, #f5f7fa);
-}
-
-/* Glass effect containers */
-section.main > div {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 10px;
-}
-
-/* Header */
 .header {
-    background: rgba(107, 127, 78, 0.9);
-    backdrop-filter: blur(6px);
+    background-color: #6B7F4E;
     padding: 15px;
     border-radius: 8px;
     color: white;
@@ -40,7 +26,6 @@ section.main > div {
     margin-bottom: 20px;
 }
 
-/* Buttons */
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
@@ -48,20 +33,6 @@ section.main > div {
     height: 45px;
     font-weight: 600;
 }
-
-/* Inputs */
-.stTextInput, .stSelectbox, .stNumberInput {
-    background-color: rgba(255,255,255,0.8);
-    border-radius: 6px;
-}
-
-/* Metrics */
-.stMetric {
-    background: rgba(255,255,255,0.6);
-    padding: 10px;
-    border-radius: 10px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
