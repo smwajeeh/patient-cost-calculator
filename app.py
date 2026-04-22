@@ -81,8 +81,9 @@ df.columns = df.columns.str.strip()
 base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
 payer_columns = sorted([c for c in df.columns if c not in base_columns])
 
-# Normalize drug names
 df["Drug_Name_Clean"] = df["Drug_Name"].astype(str).str.strip().str.lower()
+
+drug_list = ["Select Drug"] + sorted(df["Drug_Name"].dropna().unique())
 
 # -------------------------
 # PATIENT INFO
@@ -154,7 +155,7 @@ for i in range(st.session_state.med_count):
 
     col1, col2, col3 = st.columns(3)
 
-    drug = col1.selectbox("Drug", df["Drug_Name"].dropna().unique(), key=f"d{i}")
+    drug = col1.selectbox("Drug", drug_list, key=f"d{i}")
     dose = col2.number_input("Dose", min_value=0.0, key=f"dose{i}")
     unit = col3.selectbox("Units", ["mgs", "mcgs", "grams"], key=f"u{i}")
 
@@ -168,6 +169,15 @@ if st.button("Calculate"):
     if not patient_name:
         st.error("Patient Name is required")
         st.stop()
+
+    for entry in drug_entries:
+        if entry["drug"] == "Select Drug":
+            st.error("Please select a drug for all medications.")
+            st.stop()
+
+        if entry["dose"] <= 0:
+            st.error(f"Please enter a valid dose for {entry['drug']}.")
+            st.stop()
 
     if has_secondary:
         if secondary_selected in [None, "Select"]:
@@ -185,7 +195,6 @@ if st.button("Calculate"):
 
     for entry in drug_entries:
         drug_clean = str(entry["drug"]).strip().lower()
-
         filtered = df[df["Drug_Name_Clean"] == drug_clean]
 
         if filtered.empty:
@@ -199,7 +208,6 @@ if st.button("Calculate"):
         allowable = extract_number(data[payer])
 
         if billing_unit == 0:
-            st.warning(f"Invalid billing unit for {entry['drug']}. Skipping.")
             continue
 
         dose_mg = convert_to_mg(entry["dose"], entry["unit"])
@@ -208,7 +216,6 @@ if st.button("Calculate"):
         total_cost += units * cost
         total_allowed += units * allowable
 
-    # ✅ SAFE WARNING FIX
     clean_missing = [str(d) for d in missing_drugs if pd.notna(d) and str(d).strip() != ""]
 
     if clean_missing:
