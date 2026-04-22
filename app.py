@@ -38,6 +38,7 @@ h2, h3 {
     border: 1px solid rgba(255,255,255,0.1);
     text-align: center;
 }
+
 .card {
     background: rgba(255,255,255,0.05);
     padding: 20px;
@@ -89,14 +90,13 @@ payer_columns = sorted([col for col in df.columns if col not in base_columns])
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🧑 Patient Information")
 
-col1, col2, col3 = st.columns(3)
-
-# Sorted providers
 providers = sorted([
     "Sreecharan Mavuram MD",
     "Syed Raza MD",
     "Navneet Mittal MD"
 ])
+
+col1, col2, col3 = st.columns(3)
 
 with col1:
     patient_name = st.text_input("Patient Name")
@@ -221,6 +221,9 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient = remaining + copay
 
+    # -------------------------
+    # FINANCIAL SUMMARY
+    # -------------------------
     st.subheader("💰 Financial Summary")
 
     col1, col2, col3 = st.columns(3)
@@ -232,3 +235,32 @@ if st.button("Calculate"):
         st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
     else:
         st.info(f"Patient responsible: ${remaining:,.2f}")
+
+    # -------------------------
+    # SUMMARY (ADDED BACK)
+    # -------------------------
+    st.subheader("🧾 Summary")
+
+    if has_secondary:
+        st.write(f"""
+        **Provider:** {provider}  
+        **Treatment Date:** {format_date_us(treatment_date)}  
+        **Date of Birth:** {format_date_us(dob)}  
+
+        **Total Cost:** ${total_cost:,.2f}  
+        **Primary Insurance Pays:** ${primary_payment:,.2f}  
+        **Secondary Insurance Pays:** ${secondary_payment:,.2f}  
+        **Patient Responsibility:** ${patient:,.2f}
+        """)
+    else:
+        st.write(f"""
+        **Provider:** {provider}  
+        **Treatment Date:** {format_date_us(treatment_date)}  
+        **Date of Birth:** {format_date_us(dob)}  
+
+        **Total Cost:** ${total_cost:,.2f}  
+        **Primary Insurance Pays:** ${primary_payment:,.2f}  
+
+        Patient does not have secondary insurance.  
+        **Patient Responsibility:** ${patient:,.2f}
+        """)
