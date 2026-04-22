@@ -10,14 +10,25 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (ORIGINAL CLEAN)
+# STYLE (BACKGROUND IMAGE APPLIED)
 # -------------------------
 st.markdown("""
 <style>
-body { background-color: #F9FAFB; }
 
+/* Background image with overlay */
+.stApp {
+    background:
+        linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)),
+        url("background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Header */
 .header {
-    background-color: #6B7F4E;
+    background-color: rgba(107, 127, 78, 0.9);
+    backdrop-filter: blur(4px);
     padding: 15px;
     border-radius: 8px;
     color: white;
@@ -26,6 +37,7 @@ body { background-color: #F9FAFB; }
     margin-bottom: 20px;
 }
 
+/* Buttons */
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
@@ -33,9 +45,31 @@ body { background-color: #F9FAFB; }
     height: 45px;
     font-weight: 600;
 }
+
+/* Inputs */
+.stTextInput, .stSelectbox, .stNumberInput {
+    background-color: rgba(255,255,255,0.05);
+    color: white;
+}
+
+/* Metrics */
+.stMetric {
+    background: rgba(255,255,255,0.05);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* Labels */
+label, .stMarkdown, .stText {
+    color: #e5e7eb !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
+# -------------------------
+# HEADER
+# -------------------------
 st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
@@ -113,7 +147,7 @@ st.subheader("🏥 Insurance")
 payer = st.selectbox("Primary Insurance", payer_columns)
 primary_pct = st.slider("Primary Coverage %", 0, 100, 80)
 
-# ✅ MOVED COPAY HERE
+# Copay first
 copay = st.number_input("Copay", min_value=0, step=1)
 
 has_secondary = st.checkbox("Has Secondary Insurance")
