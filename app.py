@@ -10,15 +10,15 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (BACKGROUND IMAGE APPLIED)
+# STYLE (IMAGE BACKGROUND - FIXED NO BLUE)
 # -------------------------
 st.markdown("""
 <style>
 
-/* Background image with overlay */
+/* Background image with neutral overlay */
 .stApp {
     background:
-        linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)),
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
         url("background.jpg");
     background-size: cover;
     background-position: center;
@@ -59,7 +59,7 @@ st.markdown("""
     border-radius: 10px;
 }
 
-/* Labels */
+/* Text */
 label, .stMarkdown, .stText {
     color: #e5e7eb !important;
 }
