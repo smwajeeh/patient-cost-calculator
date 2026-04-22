@@ -7,7 +7,7 @@ from datetime import date
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (RESTORED CLEAN LOOK)
+# STYLE (UPDATED DARK DIVIDERS)
 # -------------------------
 st.markdown("""
 <style>
@@ -15,6 +15,7 @@ body {
     background-color: #F9FAFB;
 }
 
+/* Header */
 .header {
     background-color: #6B7F4E;
     padding: 15px;
@@ -25,14 +26,27 @@ body {
     margin-bottom: 20px;
 }
 
+/* Cards */
 .card {
     background-color: white;
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #E5E7EB;
+    border: 1px solid #374151; /* 🔥 DARK GREY */
     margin-bottom: 20px;
 }
 
+/* Remove white dividers */
+hr {
+    border: none;
+    border-top: 1px solid #374151 !important;
+}
+
+/* Streamlit default blocks */
+.css-1d391kg, .css-1v0mbdj {
+    border-color: #374151 !important;
+}
+
+/* Button */
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
@@ -40,12 +54,11 @@ body {
     height: 45px;
     font-weight: 600;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# HEADER (RESTORED EXACT TEXT)
+# HEADER
 # -------------------------
 st.markdown('<div class="header">💊 Patient Treast Cost Calculator</div>', unsafe_allow_html=True)
 
@@ -169,7 +182,6 @@ st.markdown('</div>', unsafe_allow_html=True)
 # -------------------------
 if st.button("Calculate"):
 
-    # VALIDATION
     if not patient_name:
         st.error("Patient Name is required")
         st.stop()
@@ -188,7 +200,6 @@ if st.button("Calculate"):
             st.error("Dose cannot be zero")
             st.stop()
 
-    # CALCULATION
     total_cost = 0
     total_allowed = 0
 
@@ -215,9 +226,6 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient_payment = remaining + copay
 
-    # -------------------------
-    # FINANCIAL SUMMARY
-    # -------------------------
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("💰 Financial Summary")
 
@@ -231,9 +239,6 @@ if st.button("Calculate"):
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # -------------------------
-    # SUMMARY
-    # -------------------------
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("🧾 Summary")
 
