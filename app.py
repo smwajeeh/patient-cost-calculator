@@ -10,17 +10,12 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (DEEP SLATE GRADIENT)
+# STYLE (ORIGINAL CLEAN)
 # -------------------------
 st.markdown("""
 <style>
+body { background-color: #F9FAFB; }
 
-/* Background Gradient */
-.stApp {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-}
-
-/* Header */
 .header {
     background-color: #6B7F4E;
     padding: 15px;
@@ -31,7 +26,6 @@ st.markdown("""
     margin-bottom: 20px;
 }
 
-/* Buttons */
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
@@ -39,29 +33,11 @@ st.markdown("""
     height: 45px;
     font-weight: 600;
 }
-
-/* Inputs (slightly lighter for readability) */
-.stTextInput, .stSelectbox, .stNumberInput {
-    background-color: rgba(255,255,255,0.05);
-    color: white;
-}
-
-/* Metrics */
-.stMetric {
-    background: rgba(255,255,255,0.05);
-    padding: 10px;
-    border-radius: 10px;
-}
-
-/* Labels and text */
-label, .stMarkdown, .stText {
-    color: #e5e7eb !important;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header">💊 Patient Treast Cost Calculator</div>', unsafe_allow_html=True)
+# ✅ FIXED TITLE HERE
+st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
 # HELPERS
