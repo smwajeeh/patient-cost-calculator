@@ -3,19 +3,19 @@ import pandas as pd
 import math
 import re
 from datetime import date
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from io import BytesIO
 
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (UPDATED DARK DIVIDERS)
+# STYLE
 # -------------------------
 st.markdown("""
 <style>
-body {
-    background-color: #F9FAFB;
-}
+body { background-color: #F9FAFB; }
 
-/* Header */
 .header {
     background-color: #6B7F4E;
     padding: 15px;
@@ -26,27 +26,14 @@ body {
     margin-bottom: 20px;
 }
 
-/* Cards */
 .card {
     background-color: white;
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #374151; /* 🔥 DARK GREY */
+    border: 1px solid #374151;
     margin-bottom: 20px;
 }
 
-/* Remove white dividers */
-hr {
-    border: none;
-    border-top: 1px solid #374151 !important;
-}
-
-/* Streamlit default blocks */
-.css-1d391kg, .css-1v0mbdj {
-    border-color: #374151 !important;
-}
-
-/* Button */
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
@@ -57,10 +44,7 @@ hr {
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# HEADER
-# -------------------------
-st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">💊 Patient Treast Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
 # HELPERS
@@ -82,6 +66,24 @@ def convert_to_mg(dose, unit):
 def format_date_us(d):
     return d.strftime("%m-%d-%Y")
 
+def generate_pdf(data):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer)
+    styles = getSampleStyleSheet()
+
+    content = []
+
+    content.append(Paragraph("Patient Treatment Cost Report", styles["Title"]))
+    content.append(Spacer(1, 12))
+
+    for line in data:
+        content.append(Paragraph(line, styles["Normal"]))
+        content.append(Spacer(1, 8))
+
+    doc.build(content)
+    buffer.seek(0)
+    return buffer
+
 # -------------------------
 # LOAD DATA
 # -------------------------
@@ -94,7 +96,6 @@ payer_columns = sorted([c for c in df.columns if c not in base_columns])
 # -------------------------
 # PATIENT INFO
 # -------------------------
-
 st.subheader("🧑 Patient Information")
 
 providers = sorted([
@@ -116,12 +117,9 @@ with col2:
 with col3:
     location = st.selectbox("Clinic Location", ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"])
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # -------------------------
 # INSURANCE
 # -------------------------
-
 st.subheader("🏥 Insurance")
 
 payer = st.selectbox("Primary Insurance", payer_columns)
@@ -141,12 +139,9 @@ if has_secondary:
 
 copay = st.number_input("Copay", min_value=0, step=1)
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # -------------------------
 # MEDICATIONS
 # -------------------------
-
 st.subheader("💉 Medications")
 
 if "med_count" not in st.session_state:
@@ -175,8 +170,6 @@ for i in range(st.session_state.med_count):
 
     drug_entries.append({"drug": drug, "dose": dose, "unit": unit})
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # -------------------------
 # CALCULATE
 # -------------------------
@@ -193,11 +186,6 @@ if st.button("Calculate"):
 
         if secondary_selected == "Other / Funding" and not secondary_text.strip():
             st.error("Please enter Other / Funding details")
-            st.stop()
-
-    for entry in drug_entries:
-        if entry["dose"] == 0:
-            st.error("Dose cannot be zero")
             st.stop()
 
     total_cost = 0
@@ -226,7 +214,7 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient_payment = remaining + copay
 
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    # DISPLAY
     st.subheader("💰 Financial Summary")
 
     col1, col2, col3 = st.columns(3)
@@ -237,20 +225,32 @@ if st.button("Calculate"):
     if has_secondary:
         st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    # -------------------------
+    # SUMMARY
+    # -------------------------
     st.subheader("🧾 Summary")
 
-    st.write(f"""
-    **Provider:** {provider}  
-    **Treatment Date:** {format_date_us(treatment_date)}  
-    **DOB:** {format_date_us(dob)}  
+    summary_data = [
+        f"Provider: {provider}",
+        f"Treatment Date: {format_date_us(treatment_date)}",
+        f"DOB: {format_date_us(dob)}",
+        f"Total Cost: ${total_cost:,.2f}",
+        f"Primary Pays: ${primary_payment:,.2f}",
+        f"Secondary Pays: ${secondary_payment:,.2f}",
+        f"Patient Pays: ${patient_payment:,.2f}"
+    ]
 
-    **Total Cost:** ${total_cost:,.2f}  
-    **Primary Pays:** ${primary_payment:,.2f}  
-    **Secondary Pays:** ${secondary_payment:,.2f}  
-    **Patient Pays:** ${patient_payment:,.2f}
-    """)
+    for line in summary_data:
+        st.write(line)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    # -------------------------
+    # PDF DOWNLOAD
+    # -------------------------
+    pdf_file = generate_pdf(summary_data)
+
+    st.download_button(
+        label="📄 Download PDF Report",
+        data=pdf_file,
+        file_name="patient_cost_report.pdf",
+        mime="application/pdf"
+    )
