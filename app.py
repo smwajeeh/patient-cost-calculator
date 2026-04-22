@@ -46,11 +46,9 @@ def extract_number(value):
     return float(number[0]) if number else 0
 
 def convert_to_mg(dose, unit):
-    if unit == "mcgs":
+    if unit == "mcg":
         return dose / 1000
-    elif unit == "grams":
-        return dose * 1000
-    return dose
+    return dose  # mg and units treated as-is
 
 def format_date_us(d):
     return d.strftime("%m-%d-%Y")
@@ -157,7 +155,7 @@ for i in range(st.session_state.med_count):
 
     drug = col1.selectbox("Drug", drug_list, key=f"d{i}")
     dose = col2.number_input("Dose", min_value=0.0, key=f"dose{i}")
-    unit = col3.selectbox("Units", ["mgs", "mcgs", "grams"], key=f"u{i}")
+    unit = col3.selectbox("Units", ["mg", "mcg", "units"], key=f"u{i}")
 
     drug_entries.append({"drug": drug, "dose": dose, "unit": unit})
 
