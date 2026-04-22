@@ -10,25 +10,14 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (IMAGE BACKGROUND - DARKER OVERLAY 80%)
+# STYLE (ORIGINAL CLEAN - NO BACKGROUND IMAGE)
 # -------------------------
 st.markdown("""
 <style>
+body { background-color: #F9FAFB; }
 
-/* Background image with stronger dark overlay */
-.stApp {
-    background:
-        linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
-        url("background.jpg");
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
-
-/* Header */
 .header {
-    background-color: rgba(107, 127, 78, 0.9);
-    backdrop-filter: blur(4px);
+    background-color: #6B7F4E;
     padding: 15px;
     border-radius: 8px;
     color: white;
@@ -37,7 +26,6 @@ st.markdown("""
     margin-bottom: 20px;
 }
 
-/* Buttons */
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
@@ -45,25 +33,6 @@ st.markdown("""
     height: 45px;
     font-weight: 600;
 }
-
-/* Inputs */
-.stTextInput, .stSelectbox, .stNumberInput {
-    background-color: rgba(255,255,255,0.05);
-    color: white;
-}
-
-/* Metrics */
-.stMetric {
-    background: rgba(255,255,255,0.05);
-    padding: 10px;
-    border-radius: 10px;
-}
-
-/* Text */
-label, .stMarkdown, .stText {
-    color: #e5e7eb !important;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -147,7 +116,7 @@ st.subheader("🏥 Insurance")
 payer = st.selectbox("Primary Insurance", payer_columns)
 primary_pct = st.slider("Primary Coverage %", 0, 100, 80)
 
-# Copay first
+# Copay first (final structure)
 copay = st.number_input("Copay", min_value=0, step=1)
 
 has_secondary = st.checkbox("Has Secondary Insurance")
