@@ -10,10 +10,18 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE
+# STYLE (CLEAN + HIDDEN STREAMLIT UI)
 # -------------------------
 st.markdown("""
 <style>
+
+/* Remove Streamlit default UI */
+[data-testid="stToolbar"] { display: none !important; }
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header { visibility: hidden; }
+
+/* App Styling */
 body { background-color: #F9FAFB; }
 
 .header {
@@ -33,9 +41,13 @@ body { background-color: #F9FAFB; }
     height: 45px;
     font-weight: 600;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
+# -------------------------
+# HEADER
+# -------------------------
 st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
@@ -149,16 +161,12 @@ if col_add.button("➕ Add Medication"):
 if col_remove.button("➖ Remove Medication") and st.session_state.med_count > 1:
     st.session_state.med_count -= 1
 
-# ✅ FIXED RESET
 if col_reset.button("🔄 Reset Medications"):
     st.session_state.med_count = 1
-
-    # Explicitly reset all medication fields
-    for i in range(10):  # supports up to 10 meds safely
+    for i in range(10):
         st.session_state[f"d{i}"] = "Select Drug"
         st.session_state[f"dose{i}"] = 0.0
         st.session_state[f"u{i}"] = "mg"
-
     st.rerun()
 
 drug_entries = []
