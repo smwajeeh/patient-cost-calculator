@@ -26,14 +26,6 @@ body { background-color: #F9FAFB; }
     margin-bottom: 20px;
 }
 
-.card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #374151;
-    margin-bottom: 20px;
-}
-
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
@@ -92,7 +84,6 @@ payer_columns = sorted([c for c in df.columns if c not in base_columns])
 # -------------------------
 # PATIENT INFO
 # -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🧑 Patient Information")
 
 providers = sorted([
@@ -114,12 +105,9 @@ with col2:
 with col3:
     location = st.selectbox("Clinic Location", ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"])
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # -------------------------
 # INSURANCE
 # -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🏥 Insurance")
 
 payer = st.selectbox("Primary Insurance", payer_columns)
@@ -139,12 +127,9 @@ if has_secondary:
 
 copay = st.number_input("Copay", min_value=0, step=1)
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # -------------------------
 # MEDICATIONS
 # -------------------------
-st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("💉 Medications")
 
 if "med_count" not in st.session_state:
@@ -171,8 +156,6 @@ for i in range(st.session_state.med_count):
     unit = col3.selectbox("Units", ["mgs", "mcgs", "grams"], key=f"u{i}")
 
     drug_entries.append({"drug": drug, "dose": dose, "unit": unit})
-
-st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # CALCULATE
@@ -218,10 +201,7 @@ if st.button("Calculate"):
         secondary_payment = 0
         patient_payment = remaining + copay
 
-    # -------------------------
     # FINANCIAL SUMMARY
-    # -------------------------
-    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("💰 Financial Summary")
 
     c1, c2, c3 = st.columns(3)
@@ -232,12 +212,7 @@ if st.button("Calculate"):
     if has_secondary:
         st.metric("Secondary Pays", f"${secondary_payment:,.2f}")
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # -------------------------
-    # SUMMARY (RESTORED STYLE)
-    # -------------------------
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    # SUMMARY
     st.subheader("🧾 Summary")
 
     st.markdown(f"""
@@ -251,11 +226,7 @@ if st.button("Calculate"):
     **Patient Responsibility:** ${patient_payment:,.2f}
     """)
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # -------------------------
-    # PDF DOWNLOAD
-    # -------------------------
+    # PDF
     pdf_data = [
         f"Provider: {provider}",
         f"Treatment Date: {format_date_us(treatment_date)}",
