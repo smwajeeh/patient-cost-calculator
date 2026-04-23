@@ -122,17 +122,21 @@ copay = st.number_input("Copay", min_value=0, step=1)
 
 has_secondary = st.checkbox("Has Secondary Insurance")
 
+secondary_selected = None
+secondary_text = ""
+
 if has_secondary:
-    secondary = st.selectbox("Secondary Insurance", ["Select"] + payer_columns + ["Other / Funding"])
-    if secondary == "Other / Funding":
-        other_text = st.text_input("Other / Funding Details")
+    options = ["Select"] + payer_columns + ["Other / Funding"]
+    secondary_selected = st.selectbox("Secondary Insurance", options)
+
+    if secondary_selected == "Other / Funding":
+        secondary_text = st.text_input("Other / Funding Details")
 
 # -------------------------
 # MEDICATIONS
 # -------------------------
 st.subheader("💉 Medications")
 
-# Reset
 any_selected = any(m["drug"] != "Select Drug" for m in st.session_state.meds)
 
 if st.button("🔄 Reset Medications", disabled=not any_selected):
@@ -161,18 +165,15 @@ for i, med in enumerate(st.session_state.meds):
     col4.markdown("<br>", unsafe_allow_html=True)
     delete = col4.button("Delete 🗑️", key=f"del{i}")
 
-    # clear summary on change
     if drug != med["drug"] or dose != med["dose"] or unit != med["unit"]:
         st.session_state.show_summary = False
 
     if delete:
         st.session_state.show_summary = False
-
         if i == 0:
             updated.append({"drug": "Select Drug", "dose": 0.0, "unit": ""})
         else:
-            st.session_state.meds.pop(i)
-            st.rerun()
+            continue
     else:
         updated.append({"drug": drug, "dose": dose, "unit": unit})
 
@@ -181,7 +182,6 @@ if len(updated) == 0:
 
 st.session_state.meds = updated
 
-# Add
 if st.button("➕ Add Medication"):
     st.session_state.meds.append({"drug": "Select Drug", "dose": 0.0, "unit": "mgs"})
     st.session_state.show_summary = False
@@ -194,6 +194,7 @@ if st.button("Calculate"):
 
     total_cost = 0
     total_allowed = 0
+    missing = []
 
     for entry in st.session_state.meds:
 
@@ -209,7 +210,12 @@ if st.button("Calculate"):
             st.error("Select units")
             st.stop()
 
-        data = df[df["Drug_Name_Clean"] == entry["drug"].lower()].iloc[0]
+        filtered = df[df["Drug_Name_Clean"] == entry["drug"].lower()]
+        if filtered.empty:
+            missing.append(entry["drug"])
+            continue
+
+        data = filtered.iloc[0]
 
         billing_unit = extract_number(data["Billing_Unit"])
         cost = extract_number(data["Cost_per_Unit"])
@@ -221,11 +227,18 @@ if st.button("Calculate"):
         total_cost += units * cost
         total_allowed += units * allowable
 
+    if missing:
+        st.warning("Missing drugs: " + ", ".join(missing))
+
     primary_payment = total_allowed * (primary_pct / 100)
     remaining = total_allowed - primary_payment
 
-    secondary_payment = remaining if has_secondary else 0
-    patient_payment = copay if has_secondary else remaining + copay
+    if has_secondary:
+        secondary_payment = remaining
+        patient_payment = copay
+    else:
+        secondary_payment = 0
+        patient_payment = remaining + copay
 
     st.session_state.summary = {
         "cost": total_cost,
@@ -252,6 +265,19 @@ if st.session_state.show_summary:
 
     if has_secondary:
         st.metric("Secondary Pays", f"${s['secondary']:,.2f}")
+
+    st.subheader("🧾 Summary")
+
+    st.markdown(f"""
+**Provider:** {provider}  
+**Treatment Date:** {format_date_us(treatment_date)}  
+**Date of Birth:** {format_date_us(dob)}  
+
+**Total Cost:** ${s['cost']:,.2f}  
+**Primary Insurance Pays:** ${s['primary']:,.2f}  
+**Secondary Insurance Pays:** ${s['secondary']:,.2f}  
+**Patient Responsibility:** ${s['patient']:,.2f}
+""")
 
     pdf = generate_pdf([
         f"Total Cost: ${s['cost']:,.2f}",
