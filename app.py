@@ -161,14 +161,23 @@ for i, med in enumerate(st.session_state.meds):
 
     col1, col2, col3, col4 = st.columns([3,2,2,1.5])
 
-    drug = col1.selectbox("Drug", drug_list,
+    drug = col1.selectbox(
+        "Drug",
+        drug_list,
         index=drug_list.index(med["drug"]) if med["drug"] in drug_list else 0,
         key=f"drug{i}"
     )
 
-    dose = col2.number_input("Dose", min_value=0.0, value=med["dose"], key=f"dose{i}")
+    dose = col2.number_input(
+        "Dose",
+        min_value=0.0,
+        value=med["dose"],
+        key=f"dose{i}"
+    )
 
-    unit = col3.selectbox("Units", unit_list,
+    unit = col3.selectbox(
+        "Units",
+        unit_list,
         index=unit_list.index(med["unit"]) if med["unit"] in unit_list else 0,
         key=f"unit{i}"
     )
@@ -176,11 +185,21 @@ for i, med in enumerate(st.session_state.meds):
     col4.markdown("<br>", unsafe_allow_html=True)
     delete_clicked = col4.button("Delete 🗑️", key=f"delete{i}")
 
+    # 🔥 EXACT REQUIRED LOGIC
     if delete_clicked and i == 0:
-        updated_meds.append({"drug": "Select Drug", "dose": 0.0, "unit": ""})
+        updated_meds.append({
+            "drug": "Select Drug",
+            "dose": 0.0,
+            "unit": ""
+        })
     elif not delete_clicked:
-        updated_meds.append({"drug": drug, "dose": dose, "unit": unit})
+        updated_meds.append({
+            "drug": drug,
+            "dose": dose,
+            "unit": unit
+        })
 
+# Always keep at least one row
 if len(updated_meds) == 0:
     updated_meds = [{"drug": "Select Drug", "dose": 0.0, "unit": ""}]
 
