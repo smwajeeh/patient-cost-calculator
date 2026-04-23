@@ -185,21 +185,23 @@ for i, med in enumerate(st.session_state.meds):
     col4.markdown("<br>", unsafe_allow_html=True)
     delete_clicked = col4.button("Delete 🗑️", key=f"delete{i}")
 
-    # 🔥 EXACT REQUIRED LOGIC
+    # -------- EXACT REQUIRED LOGIC --------
     if delete_clicked and i == 0:
         updated_meds.append({
             "drug": "Select Drug",
             "dose": 0.0,
             "unit": ""
         })
-    elif not delete_clicked:
+    elif delete_clicked and i != 0:
+        continue
+    else:
         updated_meds.append({
             "drug": drug,
             "dose": dose,
             "unit": unit
         })
 
-# Always keep at least one row
+# Ensure at least one row exists
 if len(updated_meds) == 0:
     updated_meds = [{"drug": "Select Drug", "dose": 0.0, "unit": ""}]
 
