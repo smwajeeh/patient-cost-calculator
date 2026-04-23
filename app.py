@@ -10,7 +10,7 @@ from io import BytesIO
 st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
 
 # -------------------------
-# STYLE (CLEAN UI)
+# STYLE
 # -------------------------
 st.markdown("""
 <style>
@@ -33,7 +33,7 @@ header { visibility: hidden; }
     background-color: #6B7F4E;
     color: white;
     border-radius: 8px;
-    height: 40px;
+    height: 38px;
     font-weight: 600;
 }
 </style>
@@ -66,8 +66,13 @@ base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
 payer_columns = sorted([c for c in df.columns if c not in base_columns])
 
 df["Drug_Name_Clean"] = df["Drug_Name"].astype(str).str.strip().str.lower()
-
 drug_list = ["Select Drug"] + sorted(df["Drug_Name"].dropna().unique())
+
+# -------------------------
+# SESSION INIT
+# -------------------------
+if "meds" not in st.session_state:
+    st.session_state.meds = [{"drug": "Select Drug", "dose": 0.0, "unit": "mg"}]
 
 # -------------------------
 # PATIENT INFO
@@ -124,44 +129,48 @@ if has_secondary:
 # -------------------------
 st.subheader("💉 Medications")
 
-if "med_count" not in st.session_state:
-    st.session_state.med_count = 1
+updated_meds = []
 
-col_add, col_remove, col_reset = st.columns(3)
+for i, med in enumerate(st.session_state.meds):
+
+    title = "Medication" if len(st.session_state.meds) == 1 else f"Medication {i+1}"
+    st.markdown(f"**{title}**")
+
+    col1, col2, col3, col4 = st.columns([3,2,2,1])
+
+    drug = col1.selectbox("Drug", drug_list,
+                          index=drug_list.index(med["drug"]) if med["drug"] in drug_list else 0,
+                          key=f"drug{i}")
+
+    dose = col2.number_input("Dose", min_value=0.0, value=med["dose"], key=f"dose{i}")
+
+    unit = col3.selectbox("Units", ["mg", "mcg", "units"],
+                          index=["mg","mcg","units"].index(med["unit"]),
+                          key=f"unit{i}")
+
+    delete_clicked = False
+    if i != 0:  # first medication cannot be deleted
+        delete_clicked = col4.button("🗑️", key=f"delete{i}")
+
+    if not delete_clicked:
+        updated_meds.append({"drug": drug, "dose": dose, "unit": unit})
+
+st.session_state.meds = updated_meds
+
+# -------------------------
+# ADD + RESET
+# -------------------------
+col_add, col_reset = st.columns(2)
 
 if col_add.button("➕ Add Medication"):
-    st.session_state.med_count += 1
-
-if col_remove.button("➖ Remove Medication") and st.session_state.med_count > 1:
-    st.session_state.med_count -= 1
-
-# Reset button (enabled only if at least one drug selected)
-any_selected = any(
-    st.session_state.get(f"d{i}", "Select Drug") != "Select Drug"
-    for i in range(st.session_state.med_count)
-)
-
-if col_reset.button("🔄 Reset Medications", disabled=not any_selected):
-    st.session_state.med_count = 1
-    for i in range(10):
-        st.session_state[f"d{i}"] = "Select Drug"
-        st.session_state[f"dose{i}"] = 0.0
-        st.session_state[f"u{i}"] = "mg"
+    st.session_state.meds.append({"drug": "Select Drug", "dose": 0.0, "unit": "mg"})
     st.rerun()
 
-drug_entries = []
+any_selected = any(m["drug"] != "Select Drug" for m in st.session_state.meds)
 
-for i in range(st.session_state.med_count):
-    title = "Medication" if st.session_state.med_count == 1 else f"Medication {i+1}"
-    st.subheader(title)
-
-    col1, col2, col3 = st.columns(3)
-
-    drug = col1.selectbox("Drug", drug_list, key=f"d{i}")
-    dose = col2.number_input("Dose", min_value=0.0, key=f"dose{i}")
-    unit = col3.selectbox("Units", ["mg", "mcg", "units"], key=f"u{i}")
-
-    drug_entries.append({"drug": drug, "dose": dose, "unit": unit})
+if col_reset.button("🔄 Reset Medications", disabled=not any_selected):
+    st.session_state.meds = [{"drug": "Select Drug", "dose": 0.0, "unit": "mg"}]
+    st.rerun()
 
 # -------------------------
 # CALCULATE
@@ -176,7 +185,7 @@ if st.button("Calculate"):
         st.error("Date of Birth must be in the past.")
         st.stop()
 
-    for entry in drug_entries:
+    for entry in st.session_state.meds:
         if entry["drug"] == "Select Drug":
             st.error("Please select a drug for all medications.")
             st.stop()
@@ -198,7 +207,7 @@ if st.button("Calculate"):
     total_allowed = 0
     missing_drugs = []
 
-    for entry in drug_entries:
+    for entry in st.session_state.meds:
         drug_clean = str(entry["drug"]).strip().lower()
         filtered = df[df["Drug_Name_Clean"] == drug_clean]
 
