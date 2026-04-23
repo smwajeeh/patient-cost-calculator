@@ -32,9 +32,9 @@ header { visibility: hidden; }
 .stButton>button {
     background-color: #6B7F4E;
     color: white;
-    border-radius: 8px;
-    height: 38px;
-    font-weight: 600;
+    border-radius: 6px;
+    height: 35px;
+    font-size: 13px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -62,10 +62,11 @@ def format_date_us(d):
 df = pd.read_excel("drug_data.xlsx")
 df.columns = df.columns.str.strip()
 
+df["Drug_Name_Clean"] = df["Drug_Name"].astype(str).str.strip().str.lower()
+
 base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
 payer_columns = sorted([c for c in df.columns if c not in base_columns])
 
-df["Drug_Name_Clean"] = df["Drug_Name"].astype(str).str.strip().str.lower()
 drug_list = ["Select Drug"] + sorted(df["Drug_Name"].dropna().unique())
 
 # -------------------------
@@ -129,6 +130,13 @@ if has_secondary:
 # -------------------------
 st.subheader("💉 Medications")
 
+# ✅ Reset button right under heading
+any_selected = any(m["drug"] != "Select Drug" for m in st.session_state.meds)
+
+if st.button("🔄 Reset Medications", disabled=not any_selected):
+    st.session_state.meds = [{"drug": "Select Drug", "dose": 0.0, "unit": "mg"}]
+    st.rerun()
+
 updated_meds = []
 
 for i, med in enumerate(st.session_state.meds):
@@ -136,7 +144,7 @@ for i, med in enumerate(st.session_state.meds):
     title = "Medication" if len(st.session_state.meds) == 1 else f"Medication {i+1}"
     st.markdown(f"**{title}**")
 
-    col1, col2, col3, col4 = st.columns([3,2,2,1])
+    col1, col2, col3, col4 = st.columns([3,2,2,1.5])
 
     drug = col1.selectbox("Drug", drug_list,
                           index=drug_list.index(med["drug"]) if med["drug"] in drug_list else 0,
@@ -148,28 +156,22 @@ for i, med in enumerate(st.session_state.meds):
                           index=["mg","mcg","units"].index(med["unit"]),
                           key=f"unit{i}")
 
-    delete_clicked = False
-    if i != 0:  # first medication cannot be deleted
-        delete_clicked = col4.button("🗑️", key=f"delete{i}")
+    delete_clicked = col4.button("Delete 🗑️", key=f"delete{i}")
 
     if not delete_clicked:
         updated_meds.append({"drug": drug, "dose": dose, "unit": unit})
 
+# ensure at least one row always exists
+if len(updated_meds) == 0:
+    updated_meds = [{"drug": "Select Drug", "dose": 0.0, "unit": "mg"}]
+
 st.session_state.meds = updated_meds
 
 # -------------------------
-# ADD + RESET
+# ADD BUTTON (dynamic position)
 # -------------------------
-col_add, col_reset = st.columns(2)
-
-if col_add.button("➕ Add Medication"):
+if st.button("➕ Add Medication"):
     st.session_state.meds.append({"drug": "Select Drug", "dose": 0.0, "unit": "mg"})
-    st.rerun()
-
-any_selected = any(m["drug"] != "Select Drug" for m in st.session_state.meds)
-
-if col_reset.button("🔄 Reset Medications", disabled=not any_selected):
-    st.session_state.meds = [{"drug": "Select Drug", "dose": 0.0, "unit": "mg"}]
     st.rerun()
 
 # -------------------------
