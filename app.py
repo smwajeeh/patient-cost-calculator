@@ -45,7 +45,7 @@ header { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header">💊 Patient Treatment ffdfefe Cost Calculator</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
 
 # -------------------------
 # HELPERS
