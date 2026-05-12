@@ -188,58 +188,118 @@ div[data-baseweb="select"]:focus-within,
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header">💊 Patient Treatment Cost Calculator</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="header">💊 Patient Treatment Cost Calculator</div>',
+    unsafe_allow_html=True
+)
 
 # -------------------------
 # HELPERS
 # -------------------------
 def extract_number(value):
+    if pd.isna(value):
+        return 0.0
+
     number = re.findall(r"[\d\.]+", str(value))
-    return float(number[0]) if number else 0
+    return float(number[0]) if number else 0.0
+
 
 def convert_to_mg(dose, unit):
+    dose = float(dose)
+
     if unit == "mcgs":
         return dose / 1000
+
     return dose
+
 
 def format_date_us(d):
     return d.strftime("%m-%d-%Y")
 
+
 def generate_pdf(data):
     buffer = BytesIO()
+
     doc = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
     content = []
 
-    content.append(Paragraph("Patient Treatment Cost Report", styles["Title"]))
+    content.append(
+        Paragraph("Patient Treatment Cost Report", styles["Title"])
+    )
+
     content.append(Spacer(1, 12))
 
     for line in data:
-        content.append(Paragraph(line, styles["Normal"]))
+        content.append(Paragraph(str(line), styles["Normal"]))
         content.append(Spacer(1, 8))
 
     doc.build(content)
+
     buffer.seek(0)
+
     return buffer
+
 
 # -------------------------
 # LOAD DATA
 # -------------------------
-df = pd.read_excel("drug_data.xlsx")
+try:
+    df = pd.read_excel("drug_data.xlsx")
+except Exception as e:
+    st.error(f"Unable to load drug_data.xlsx: {e}")
+    st.stop()
+
 df.columns = df.columns.str.strip()
-df["Drug_Name_Clean"] = df["Drug_Name"].astype(str).str.strip().str.lower()
 
-base_columns = ["J_Code", "Drug_Name", "Billing_Unit", "Cost_per_Unit"]
-payer_columns = sorted([c for c in df.columns if c not in base_columns])
+required_cols = [
+    "Drug_Name",
+    "Billing_Unit",
+    "Cost_per_Unit"
+]
 
-drug_list = ["Select Drug"] + sorted(df["Drug_Name"].dropna().unique())
-unit_list = ["", "mgs", "mcgs", "units"]
+missing_cols = [c for c in required_cols if c not in df.columns]
+
+if missing_cols:
+    st.error(f"Missing required columns: {', '.join(missing_cols)}")
+    st.stop()
+
+df["Drug_Name_Clean"] = (
+    df["Drug_Name"]
+    .astype(str)
+    .str.strip()
+    .str.lower()
+)
+
+base_columns = [
+    "J_Code",
+    "Drug_Name",
+    "Billing_Unit",
+    "Cost_per_Unit",
+    "Drug_Name_Clean"
+]
+
+payer_columns = sorted([
+    c for c in df.columns if c not in base_columns
+])
+
+drug_list = ["Select Drug"] + sorted(
+    df["Drug_Name"].dropna().astype(str).unique()
+)
+
+unit_list = ["mgs", "mcgs", "units"]
 
 # -------------------------
 # SESSION STATE
 # -------------------------
 if "meds" not in st.session_state:
-    st.session_state.meds = [{"drug": "Select Drug", "dose": 0.0, "unit": "mgs"}]
+    st.session_state.meds = [
+        {
+            "drug": "Select Drug",
+            "dose": float(0.0),
+            "unit": "mgs"
+        }
+    ]
 
 if "show_summary" not in st.session_state:
     st.session_state.show_summary = False
@@ -255,14 +315,17 @@ providers = sorted([
     "Syed Raza MD"
 ])
 
-c1, c2, c3 = st.columns(3)
 today = date.today()
+
 max_dob = today - timedelta(days=1)
 min_dob = date(1900, 1, 1)
 default_dob = date(2000, 1, 1)
 
+c1, c2, c3 = st.columns(3)
+
 with c1:
     patient_name = st.text_input("Patient Name")
+
     dob = st.date_input(
         "Date of Birth",
         value=default_dob,
@@ -273,19 +336,42 @@ with c1:
 
 with c2:
     provider = st.selectbox("Provider", providers)
-    treatment_date = st.date_input("Date of Treatment", value=today)
+
+    treatment_date = st.date_input(
+        "Date of Treatment",
+        value=today
+    )
 
 with c3:
-    location = st.selectbox("Clinic Location", ["Downtown","Live Oak","Mission Trail","Stone Oak"])
+    location = st.selectbox(
+        "Clinic Location",
+        ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"]
+    )
 
 # -------------------------
 # INSURANCE
 # -------------------------
 st.subheader("🏥 Insurance")
 
+if not payer_columns:
+    st.error("No insurance payer columns found in Excel file.")
+    st.stop()
+
 payer = st.selectbox("Primary Insurance", payer_columns)
-primary_pct = st.slider("Primary Coverage %", 0, 100, 80)
-copay = st.number_input("Copay", min_value=0, step=1)
+
+primary_pct = st.slider(
+    "Primary Coverage %",
+    min_value=0,
+    max_value=100,
+    value=80
+)
+
+copay = st.number_input(
+    "Copay",
+    min_value=0.0,
+    value=0.0,
+    step=1.0
+)
 
 has_secondary = st.checkbox("Has Secondary Insurance")
 
@@ -293,21 +379,41 @@ secondary_selected = None
 secondary_text = ""
 
 if has_secondary:
+
     options = ["Select"] + payer_columns + ["Other / Funding"]
-    secondary_selected = st.selectbox("Secondary Insurance", options)
+
+    secondary_selected = st.selectbox(
+        "Secondary Insurance",
+        options
+    )
 
     if secondary_selected == "Other / Funding":
-        secondary_text = st.text_input("Other / Funding Details")
+        secondary_text = st.text_input(
+            "Other / Funding Details"
+        )
 
 # -------------------------
 # MEDICATIONS
 # -------------------------
 st.subheader("💉 Medications")
 
-any_selected = any(m["drug"] != "Select Drug" for m in st.session_state.meds)
+any_selected = any(
+    m["drug"] != "Select Drug"
+    for m in st.session_state.meds
+)
 
-if st.button("🔄 Reset Medications", disabled=not any_selected):
-    st.session_state.meds = [{"drug": "Select Drug", "dose": 0.0, "unit": "mgs"}]
+if st.button(
+    "🔄 Reset Medications",
+    disabled=not any_selected
+):
+    st.session_state.meds = [
+        {
+            "drug": "Select Drug",
+            "dose": float(0.0),
+            "unit": "mgs"
+        }
+    ]
+
     st.session_state.show_summary = False
     st.rerun()
 
@@ -315,42 +421,103 @@ updated = []
 
 for i, med in enumerate(st.session_state.meds):
 
-    col1, col2, col3, col4 = st.columns([3,2,2,1.5])
+    col1, col2, col3, col4 = st.columns([3, 2, 2, 1.5])
 
-    drug = col1.selectbox("Drug", drug_list,
-        index=drug_list.index(med["drug"]) if med["drug"] in drug_list else 0,
+    current_drug = str(med.get("drug", "Select Drug"))
+
+    current_dose = float(
+        med.get("dose", 0.0) or 0.0
+    )
+
+    current_unit = str(
+        med.get("unit", "mgs")
+    )
+
+    if current_unit not in unit_list:
+        current_unit = "mgs"
+
+    drug = col1.selectbox(
+        "Drug",
+        drug_list,
+        index=(
+            drug_list.index(current_drug)
+            if current_drug in drug_list
+            else 0
+        ),
         key=f"d{i}"
     )
 
-    dose = col2.number_input("Dose", min_value=0.0, value=med["dose"], key=f"ds{i}")
+    dose = col2.number_input(
+        "Dose",
+        min_value=0.0,
+        value=float(current_dose),
+        step=1.0,
+        key=f"ds{i}"
+    )
 
-    unit = col3.selectbox("Units", unit_list,
-        index=unit_list.index(med["unit"]) if med["unit"] in unit_list else 1,
+    unit = col3.selectbox(
+        "Units",
+        unit_list,
+        index=(
+            unit_list.index(current_unit)
+            if current_unit in unit_list
+            else 0
+        ),
         key=f"u{i}"
     )
 
     col4.markdown("<br>", unsafe_allow_html=True)
-    delete = col4.button("Delete 🗑️", key=f"del{i}")
 
-    if drug != med["drug"] or dose != med["dose"] or unit != med["unit"]:
+    delete = col4.button(
+        "Delete 🗑️",
+        key=f"del{i}"
+    )
+
+    if (
+        drug != current_drug
+        or float(dose) != float(current_dose)
+        or unit != current_unit
+    ):
         st.session_state.show_summary = False
 
     if delete:
+
         st.session_state.show_summary = False
+
         if i == 0:
-            updated.append({"drug": "Select Drug", "dose": 0.0, "unit": ""})
-        else:
-            continue
-    else:
-        updated.append({"drug": drug, "dose": dose, "unit": unit})
+            updated.append({
+                "drug": "Select Drug",
+                "dose": float(0.0),
+                "unit": "mgs"
+            })
+
+        continue
+
+    updated.append({
+        "drug": drug,
+        "dose": float(dose),
+        "unit": unit
+    })
 
 if len(updated) == 0:
-    updated = [{"drug": "Select Drug", "dose": 0.0, "unit": "mgs"}]
+    updated = [
+        {
+            "drug": "Select Drug",
+            "dose": float(0.0),
+            "unit": "mgs"
+        }
+    ]
 
 st.session_state.meds = updated
 
 if st.button("➕ Add Medication"):
-    st.session_state.meds.append({"drug": "Select Drug", "dose": 0.0, "unit": "mgs"})
+
+    st.session_state.meds.append({
+        "drug": "Select Drug",
+        "dose": float(0.0),
+        "unit": "mgs"
+    })
+
     st.session_state.show_summary = False
     st.rerun()
 
@@ -359,8 +526,8 @@ if st.button("➕ Add Medication"):
 # -------------------------
 if st.button("Calculate"):
 
-    total_cost = 0
-    total_allowed = 0
+    total_cost = 0.0
+    total_allowed = 0.0
     missing = []
 
     if dob is None:
@@ -368,58 +535,93 @@ if st.button("Calculate"):
         st.stop()
 
     if dob < min_dob or dob > max_dob:
-        st.error("Date of birth must be between 01-01-1900 and yesterday.")
+        st.error(
+            "Date of birth must be between 01-01-1900 and yesterday."
+        )
         st.stop()
 
     for entry in st.session_state.meds:
 
-        if entry["drug"] == "Select Drug":
-            st.error("Select drug")
+        drug_name = str(entry.get("drug", "")).strip()
+        dose_value = float(entry.get("dose", 0.0) or 0.0)
+        unit_value = str(entry.get("unit", "")).strip()
+
+        if drug_name == "Select Drug":
+            st.error("Please select a drug.")
             st.stop()
 
-        if entry["dose"] <= 0:
-            st.error("Invalid dose")
+        if dose_value <= 0:
+            st.error(f"Invalid dose for {drug_name}.")
             st.stop()
 
-        if entry["unit"] == "":
-            st.error("Select units")
+        if unit_value == "":
+            st.error(f"Please select units for {drug_name}.")
             st.stop()
 
-        filtered = df[df["Drug_Name_Clean"] == entry["drug"].lower()]
+        filtered = df[
+            df["Drug_Name_Clean"]
+            == drug_name.lower()
+        ]
+
         if filtered.empty:
-            missing.append(entry["drug"])
+            missing.append(drug_name)
             continue
 
         data = filtered.iloc[0]
 
-        billing_unit = extract_number(data["Billing_Unit"])
-        cost = extract_number(data["Cost_per_Unit"])
-        allowable = extract_number(data[payer])
+        billing_unit = extract_number(
+            data["Billing_Unit"]
+        )
 
-        dose_mg = convert_to_mg(entry["dose"], entry["unit"])
-        units = math.ceil(dose_mg / billing_unit)
+        cost = extract_number(
+            data["Cost_per_Unit"]
+        )
+
+        allowable = extract_number(
+            data[payer]
+        )
+
+        if billing_unit <= 0:
+            st.error(
+                f"Invalid billing unit for {drug_name}."
+            )
+            st.stop()
+
+        dose_mg = convert_to_mg(
+            dose_value,
+            unit_value
+        )
+
+        units = math.ceil(
+            dose_mg / billing_unit
+        )
 
         total_cost += units * cost
         total_allowed += units * allowable
 
     if missing:
-        st.warning("Missing drugs: " + ", ".join(missing))
+        st.warning(
+            "Missing drugs: " + ", ".join(missing)
+        )
 
-    primary_payment = total_allowed * (primary_pct / 100)
+    primary_payment = (
+        total_allowed * (primary_pct / 100)
+    )
+
     remaining = total_allowed - primary_payment
 
     if has_secondary:
         secondary_payment = remaining
         patient_payment = copay
     else:
-        secondary_payment = 0
+        secondary_payment = 0.0
         patient_payment = remaining + copay
 
     st.session_state.summary = {
-        "cost": total_cost,
-        "primary": primary_payment,
-        "secondary": secondary_payment,
-        "patient": patient_payment
+        "cost": float(total_cost),
+        "primary": float(primary_payment),
+        "secondary": float(secondary_payment),
+        "patient": float(patient_payment)
     }
 
     st.session_state.show_summary = True
@@ -434,30 +636,67 @@ if st.session_state.show_summary:
     st.subheader("💰 Financial Summary")
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("Total Cost", f"${s['cost']:,.2f}")
-    c2.metric("Primary Pays", f"${s['primary']:,.2f}")
-    c3.metric("Patient Pays", f"${s['patient']:,.2f}")
+
+    c1.metric(
+        "Total Cost",
+        f"${s['cost']:,.2f}"
+    )
+
+    c2.metric(
+        "Primary Pays",
+        f"${s['primary']:,.2f}"
+    )
+
+    c3.metric(
+        "Patient Pays",
+        f"${s['patient']:,.2f}"
+    )
 
     if has_secondary:
-        st.metric("Secondary Pays", f"${s['secondary']:,.2f}")
+        st.metric(
+            "Secondary Pays",
+            f"${s['secondary']:,.2f}"
+        )
 
     st.subheader("🧾 Summary")
 
     st.markdown(f"""
-**Provider:** {provider}  
-**Treatment Date:** {format_date_us(treatment_date)}  
-**Date of Birth:** {format_date_us(dob)}  
+**Patient Name:** {patient_name}
 
-**Total Cost:** ${s['cost']:,.2f}  
-**Primary Insurance Pays:** ${s['primary']:,.2f}  
-**Secondary Insurance Pays:** ${s['secondary']:,.2f}  
+**Provider:** {provider}
+
+**Treatment Date:** {format_date_us(treatment_date)}
+
+**Date of Birth:** {format_date_us(dob)}
+
+**Location:** {location}
+
+**Primary Insurance:** {payer}
+
+**Total Cost:** ${s['cost']:,.2f}
+
+**Primary Insurance Pays:** ${s['primary']:,.2f}
+
+**Secondary Insurance Pays:** ${s['secondary']:,.2f}
+
 **Patient Responsibility:** ${s['patient']:,.2f}
 """)
 
     pdf = generate_pdf([
+        f"Patient Name: {patient_name}",
+        f"Provider: {provider}",
+        f"Treatment Date: {format_date_us(treatment_date)}",
+        f"Date of Birth: {format_date_us(dob)}",
+        f"Location: {location}",
+        f"Primary Insurance: {payer}",
         f"Total Cost: ${s['cost']:,.2f}",
-        f"Primary: ${s['primary']:,.2f}",
-        f"Patient: ${s['patient']:,.2f}"
+        f"Primary Insurance Pays: ${s['primary']:,.2f}",
+        f"Secondary Insurance Pays: ${s['secondary']:,.2f}",
+        f"Patient Responsibility: ${s['patient']:,.2f}"
     ])
 
-    st.download_button("📄 Download PDF", pdf, "report.pdf")
+    st.download_button(
+        "📄 Download PDF",
+        pdf,
+        "report.pdf"
+    )
