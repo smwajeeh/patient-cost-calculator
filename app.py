@@ -1,3 +1,8 @@
+# Updated app.py
+
+Replace your existing `app.py` with the code below.
+
+```python
 import streamlit as st
 import pandas as pd
 import math
@@ -18,7 +23,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# MODERN MEDICAL UI THEME
+# ULTRA MODERN MEDICAL DASHBOARD UI
 # ---------------------------------------------------
 
 st.markdown("""
@@ -28,37 +33,34 @@ st.markdown("""
 
 :root {
 
-    --bg: #f4f7fc;
+    --primary: #4c6fff;
+    --primary-dark: #3d5df3;
+    --primary-soft: #eef3ff;
 
-    --card: rgba(255,255,255,0.90);
+    --success: #17c964;
+    --success-soft: #ecfff4;
 
-    --white: #ffffff;
+    --danger: #ff5b5b;
+    --danger-soft: #fff1f1;
+
+    --purple: #8b5cf6;
+    --purple-soft: #f4efff;
+
+    --bg: #f6f8fc;
+
+    --card: rgba(255,255,255,0.84);
 
     --text: #14213d;
 
-    --muted: #6b7280;
+    --muted: #7c8ba1;
 
-    --primary: #4f7cff;
-
-    --primary-dark: #3b63dd;
-
-    --primary-soft: #eef3ff;
-
-    --success: #18b368;
-
-    --danger: #ff5c5c;
-
-    --purple: #8b5cf6;
-
-    --border: rgba(226,232,240,0.95);
+    --border: rgba(226,232,240,0.9);
 
     --shadow:
-        0 10px 35px rgba(15,23,42,0.06);
+        0 12px 40px rgba(15,23,42,0.05);
 
-    --radius: 24px;
+    --radius: 28px;
 }
-
-/* Hide Streamlit Branding */
 
 #MainMenu {
     visibility: hidden;
@@ -76,8 +78,6 @@ header {
     display: none !important;
 }
 
-/* Global */
-
 html,
 body,
 [class*="css"] {
@@ -92,38 +92,34 @@ body,
     background:
         linear-gradient(
             180deg,
-            #f8fbff 0%,
-            #edf3ff 100%
+            #fbfcff 0%,
+            #eef4ff 100%
         );
 }
 
-/* Layout */
-
 .block-container {
 
-    max-width: 1280px;
+    max-width: 1320px;
 
     padding-top: 2rem !important;
 
     padding-bottom: 4rem !important;
 }
 
-/* Main Header */
-
 .hero {
 
     background:
         linear-gradient(
             135deg,
-            rgba(255,255,255,0.96),
-            rgba(255,255,255,0.82)
+            rgba(255,255,255,0.95),
+            rgba(255,255,255,0.80)
         );
 
-    border-radius: 32px;
+    border-radius: 34px;
 
-    padding: 34px;
+    padding: 38px;
 
-    border: 1px solid rgba(255,255,255,0.75);
+    border: 1px solid rgba(255,255,255,0.85);
 
     box-shadow: var(--shadow);
 
@@ -131,9 +127,9 @@ body,
 
     overflow: hidden;
 
-    margin-bottom: 1.6rem;
+    margin-bottom: 1.8rem;
 
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(18px);
 }
 
 .hero::before {
@@ -149,18 +145,18 @@ body,
     background:
         radial-gradient(
             circle,
-            rgba(79,124,255,0.12),
+            rgba(76,111,255,0.12),
             transparent 70%
         );
 
     top: -180px;
 
-    right: -120px;
+    right: -140px;
 }
 
 .hero-title {
 
-    font-size: 44px;
+    font-size: 52px;
 
     font-weight: 800;
 
@@ -179,33 +175,29 @@ body,
 
     color: var(--muted);
 
-    font-size: 16px;
+    font-size: 18px;
 
     position: relative;
 
     z-index: 2;
 }
 
-/* Cards */
-
 [data-testid="stVerticalBlock"] > div {
 
-    background: rgba(255,255,255,0.80);
+    background: rgba(255,255,255,0.72);
 
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(18px);
 
-    border-radius: 26px;
+    border-radius: var(--radius);
 
-    border: 1px solid rgba(255,255,255,0.75);
+    border: 1px solid rgba(255,255,255,0.82);
 
-    padding: 1.6rem;
+    padding: 1.8rem;
 
     box-shadow: var(--shadow);
 
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.4rem;
 }
-
-/* Remove card from first element */
 
 [data-testid="stVerticalBlock"] > div:first-child {
 
@@ -218,21 +210,17 @@ body,
     padding: 0;
 }
 
-/* Section Headers */
-
 h1,
 h2,
 h3,
 .stSubheader {
 
-    color: var(--text);
+    color: var(--primary);
 
     font-weight: 700;
 
     letter-spacing: -0.03em;
 }
-
-/* Inputs */
 
 div[data-baseweb="input"] > div,
 div[data-baseweb="select"] > div,
@@ -241,11 +229,11 @@ div[data-baseweb="select"] > div,
 
     background: rgba(255,255,255,0.92);
 
-    border: 1px solid #dfe7f5;
+    border: 1px solid #e3eaf8;
 
-    border-radius: 16px;
+    border-radius: 18px;
 
-    min-height: 52px;
+    min-height: 56px;
 
     transition: all 0.18s ease;
 }
@@ -258,7 +246,7 @@ div[data-baseweb="select"]:focus-within,
     border-color: var(--primary);
 
     box-shadow:
-        0 0 0 4px rgba(79,124,255,0.12);
+        0 0 0 5px rgba(76,111,255,0.12);
 }
 
 div[data-baseweb="input"] input,
@@ -266,9 +254,9 @@ div[data-baseweb="input"] input,
 .stDateInput input {
 
     color: var(--text);
-}
 
-/* Buttons */
+    font-size: 15px;
+}
 
 .stButton > button,
 .stDownloadButton > button {
@@ -284,16 +272,16 @@ div[data-baseweb="input"] input,
 
     border: none;
 
-    border-radius: 16px;
+    border-radius: 18px;
 
-    padding: 0.72rem 1.4rem;
+    padding: 0.78rem 1.6rem;
 
     font-weight: 700;
 
-    transition: all 0.18s ease;
+    transition: all 0.2s ease;
 
     box-shadow:
-        0 12px 24px rgba(79,124,255,0.22);
+        0 14px 28px rgba(76,111,255,0.24);
 }
 
 .stButton > button:hover,
@@ -302,24 +290,20 @@ div[data-baseweb="input"] input,
     transform: translateY(-2px);
 
     box-shadow:
-        0 18px 32px rgba(79,124,255,0.28);
+        0 20px 36px rgba(76,111,255,0.30);
 }
-
-/* Delete Buttons */
 
 button[kind="secondary"] {
 
     background:
         linear-gradient(
             135deg,
-            #ff7a7a,
-            #ff5c5c
+            #ff8a8a,
+            #ff5b5b
         ) !important;
 
     color: white !important;
 }
-
-/* Metrics */
 
 [data-testid="stMetric"] {
 
@@ -330,11 +314,11 @@ button[kind="secondary"] {
             rgba(248,251,255,0.88)
         );
 
-    border-radius: 22px;
+    border-radius: 24px;
 
-    border: 1px solid rgba(226,232,240,0.9);
+    border: 1px solid rgba(226,232,240,0.85);
 
-    padding: 1rem;
+    padding: 1.1rem;
 
     box-shadow:
         0 8px 24px rgba(15,23,42,0.04);
@@ -356,20 +340,18 @@ button[kind="secondary"] {
     letter-spacing: -0.03em;
 }
 
-/* Slider */
-
 .stSlider [data-baseweb="slider"] [role="slider"] {
 
     background-color: var(--primary);
+
+    border: 4px solid white;
 }
 
 .stSlider [data-baseweb="slider"] > div > div {
 
     background-color:
-        rgba(79,124,255,0.20);
+        rgba(76,111,255,0.18);
 }
-
-/* Alerts */
 
 .stAlert {
 
@@ -378,22 +360,20 @@ button[kind="secondary"] {
     border: 1px solid rgba(226,232,240,0.9);
 }
 
-/* Scrollbar */
-
 ::-webkit-scrollbar {
     width: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
 
-    background: #cfd8ea;
+    background: #d4ddf1;
 
     border-radius: 20px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
 
-    background: #a8b6d6;
+    background: #b9c7e8;
 }
 
 </style>
@@ -411,7 +391,7 @@ st.markdown("""
     </div>
 
     <div class="hero-sub">
-        Accurate treatment estimates for informed healthcare decisions
+        Accurate estimates for informed healthcare decisions
     </div>
 
 </div>
@@ -1027,3 +1007,4 @@ if st.session_state.show_summary:
         pdf,
         "patient_treatment_report.pdf"
     )
+```
