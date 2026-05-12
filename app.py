@@ -7,204 +7,374 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 
-st.set_page_config(page_title="Treatment Cost Calculator", layout="wide")
+st.set_page_config(
+    page_title="Treatment Cost Calculator",
+    page_icon="💊",
+    layout="wide"
+)
 
-# -------------------------
-# STYLE
-# -------------------------
+# ---------------------------------------------------
+# MODERN HEALTHCARE THEME
+# ---------------------------------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --bg: #f4efe6;
-    --surface: rgba(255, 252, 247, 0.92);
-    --surface-strong: #fffaf2;
-    --ink: #20313a;
-    --muted: #617781;
-    --accent: #167c80;
-    --accent-deep: #0d5e63;
-    --accent-soft: #d9efef;
-    --border: rgba(32, 49, 58, 0.10);
-    --shadow: 0 18px 44px rgba(41, 59, 67, 0.12);
+    --bg: #f4f7fc;
+    --card: rgba(255,255,255,0.92);
+    --card-strong: #ffffff;
+    --text: #172b4d;
+    --muted: #6b7a90;
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #dbeafe;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --border: rgba(148, 163, 184, 0.25);
+
+    --shadow:
+        0 10px 30px rgba(15, 23, 42, 0.08);
+
+    --radius: 20px;
 }
 
-[data-testid="stToolbar"] { display: none !important; }
-#MainMenu { visibility: hidden; }
-footer { visibility: hidden; }
-header { visibility: hidden; }
+/* Hide Streamlit junk */
 
-html, body, [class*="css"]  {
-    font-family: "Manrope", sans-serif;
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    visibility: hidden;
+}
+
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+/* Global */
+
+html,
+body,
+[class*="css"] {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
 }
 
 .stApp {
     background:
-        radial-gradient(circle at top left, rgba(22, 124, 128, 0.16), transparent 30%),
-        radial-gradient(circle at top right, rgba(233, 181, 95, 0.18), transparent 26%),
-        linear-gradient(180deg, #f8f4ed 0%, #f1ebe1 100%);
-    color: var(--ink);
+        radial-gradient(circle at top left,
+            rgba(37,99,235,0.08),
+            transparent 28%),
+
+        radial-gradient(circle at top right,
+            rgba(14,165,233,0.10),
+            transparent 24%),
+
+        linear-gradient(
+            180deg,
+            #f8fbff 0%,
+            #eef4ff 100%
+        );
 }
+
+/* Container */
 
 [data-testid="stAppViewContainer"] > .main {
     background: transparent;
 }
 
-[data-testid="stAppViewContainer"] .main .block-container {
-    max-width: 1180px;
-    padding-top: 2rem;
-    padding-bottom: 3rem;
+.block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1250px;
 }
 
-.stSubheader,
-h1, h2, h3 {
-    color: var(--ink);
-    letter-spacing: -0.02em;
-}
+/* Header */
 
-.stMarkdown,
-label,
-p,
-li,
-span {
-    color: var(--ink);
-}
-
-.header {
+.main-header {
     background:
-        linear-gradient(135deg, rgba(10, 71, 81, 0.95), rgba(22, 124, 128, 0.88)),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
-    padding: 22px 26px;
-    border-radius: 22px;
+        linear-gradient(
+            135deg,
+            #2563eb 0%,
+            #1d4ed8 100%
+        );
+
+    padding: 32px;
+    border-radius: 28px;
+
     color: white;
-    font-size: 30px;
+
+    margin-bottom: 1.5rem;
+
+    box-shadow:
+        0 18px 40px rgba(37,99,235,0.25);
+
+    position: relative;
+    overflow: hidden;
+}
+
+.main-header::before {
+    content: "";
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    background: rgba(255,255,255,0.08);
+
+    border-radius: 50%;
+
+    top: -120px;
+    right: -80px;
+}
+
+.main-title {
+    font-size: 36px;
     font-weight: 800;
-    margin-bottom: 18px;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    letter-spacing: -0.04em;
+    position: relative;
+    z-index: 2;
 }
 
-[data-testid="stAppViewContainer"] .main .block-container > div[data-testid="stVerticalBlock"] > div {
-    background: var(--surface);
+.main-subtitle {
+    margin-top: 8px;
+    opacity: 0.92;
+    font-size: 15px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Cards */
+
+[data-testid="stVerticalBlock"] > div {
+    background: var(--card);
+
     border: 1px solid var(--border);
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    padding: 1.1rem 1.2rem;
+
+    border-radius: var(--radius);
+
+    padding: 1.35rem;
+
     margin-bottom: 1rem;
-    backdrop-filter: blur(8px);
+
+    box-shadow: var(--shadow);
+
+    backdrop-filter: blur(10px);
 }
 
-[data-testid="stAppViewContainer"] .main .block-container > div[data-testid="stVerticalBlock"] > div:first-child {
+/* Remove card from first element */
+
+[data-testid="stVerticalBlock"] > div:first-child {
     background: transparent;
     border: none;
     box-shadow: none;
     padding: 0;
-    margin-bottom: 0.6rem;
-    backdrop-filter: none;
 }
+
+/* Typography */
+
+h1,
+h2,
+h3,
+.stSubheader {
+    color: var(--text);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+label,
+p,
+span,
+li {
+    color: var(--text);
+}
+
+/* Inputs */
 
 div[data-baseweb="input"] > div,
 div[data-baseweb="select"] > div,
-div[data-baseweb="base-input"] > div,
 .stDateInput > div > div,
 .stNumberInput > div > div {
-    background: var(--surface-strong);
+
+    background: var(--card-strong);
+
+    border: 1px solid #dbe3f0;
+
     border-radius: 14px;
-    border: 1px solid rgba(22, 124, 128, 0.18);
+
+    transition: all 0.18s ease;
 }
 
 div[data-baseweb="input"] input,
 .stDateInput input,
 .stNumberInput input {
-    color: var(--ink);
-}
-
-div[data-baseweb="select"] svg,
-.stDateInput svg {
-    color: var(--accent-deep);
+    color: var(--text);
 }
 
 div[data-baseweb="input"]:focus-within,
 div[data-baseweb="select"]:focus-within,
 .stDateInput > div > div:focus-within,
 .stNumberInput > div > div:focus-within {
-    box-shadow: 0 0 0 3px rgba(22, 124, 128, 0.14);
-    border-color: rgba(22, 124, 128, 0.45);
+
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 4px rgba(37,99,235,0.12);
 }
+
+/* Buttons */
 
 .stButton > button,
 .stDownloadButton > button {
-    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary) 0%,
+            var(--primary-dark) 100%
+        );
+
     color: white;
+
     border: none;
+
     border-radius: 14px;
+
+    padding: 0.72rem 1.2rem;
+
     font-weight: 700;
-    padding: 0.65rem 1rem;
-    box-shadow: 0 10px 24px rgba(13, 94, 99, 0.22);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+
+    transition: all 0.18s ease;
+
+    box-shadow:
+        0 10px 24px rgba(37,99,235,0.24);
 }
 
 .stButton > button:hover,
 .stDownloadButton > button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 14px 28px rgba(13, 94, 99, 0.26);
-    filter: saturate(1.05);
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 16px 30px rgba(37,99,235,0.30);
 }
 
-.stButton > button[kind="secondary"] {
-    background: linear-gradient(135deg, #c96b56, #a64f3d);
+/* Delete Button */
+
+button[kind="secondary"] {
+
+    background:
+        linear-gradient(
+            135deg,
+            #ef4444,
+            #dc2626
+        ) !important;
+
+    color: white !important;
 }
+
+/* Metrics */
 
 [data-testid="stMetric"] {
-    background: linear-gradient(180deg, #fffdf8 0%, #f7f4ec 100%);
-    border: 1px solid var(--border);
-    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f8fbff 100%
+        );
+
+    border: 1px solid #e5edf8;
+
+    border-radius: 20px;
+
     padding: 1rem;
+
+    box-shadow:
+        0 8px 20px rgba(15,23,42,0.05);
 }
 
 [data-testid="stMetricLabel"] {
     color: var(--muted);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 [data-testid="stMetricValue"] {
-    color: var(--accent-deep);
+    color: var(--primary-dark);
     font-weight: 800;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
 }
+
+/* Alerts */
 
 .stAlert {
     border-radius: 16px;
-    border: 1px solid rgba(32, 49, 58, 0.08);
+    border: 1px solid rgba(148,163,184,0.2);
 }
 
+/* Slider */
+
 .stSlider [data-baseweb="slider"] [role="slider"] {
-    background-color: var(--accent);
+    background-color: var(--primary);
 }
 
 .stSlider [data-baseweb="slider"] > div > div {
-    background-color: rgba(22, 124, 128, 0.18);
+    background-color: rgba(37,99,235,0.2);
 }
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown(
-    '<div class="header">💊 Patient Treatment Cost Calculator</div>',
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div class="main-header">
+    <div class="main-title">
+        💊 Patient Treatment Cost Calculator
+    </div>
 
-# -------------------------
+    <div class="main-subtitle">
+        Modern healthcare financial estimation dashboard
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ---------------------------------------------------
 # HELPERS
-# -------------------------
+# ---------------------------------------------------
+
 def extract_number(value):
+
     if pd.isna(value):
         return 0.0
 
     number = re.findall(r"[\d\.]+", str(value))
+
     return float(number[0]) if number else 0.0
 
 
 def convert_to_mg(dose, unit):
+
     dose = float(dose)
 
     if unit == "mcgs":
@@ -218,20 +388,33 @@ def format_date_us(d):
 
 
 def generate_pdf(data):
+
     buffer = BytesIO()
 
     doc = SimpleDocTemplate(buffer)
+
     styles = getSampleStyleSheet()
+
     content = []
 
     content.append(
-        Paragraph("Patient Treatment Cost Report", styles["Title"])
+        Paragraph(
+            "Patient Treatment Cost Report",
+            styles["Title"]
+        )
     )
 
     content.append(Spacer(1, 12))
 
     for line in data:
-        content.append(Paragraph(str(line), styles["Normal"]))
+
+        content.append(
+            Paragraph(
+                str(line),
+                styles["Normal"]
+            )
+        )
+
         content.append(Spacer(1, 8))
 
     doc.build(content)
@@ -240,14 +423,19 @@ def generate_pdf(data):
 
     return buffer
 
-
-# -------------------------
+# ---------------------------------------------------
 # LOAD DATA
-# -------------------------
+# ---------------------------------------------------
+
 try:
     df = pd.read_excel("drug_data.xlsx")
+
 except Exception as e:
-    st.error(f"Unable to load drug_data.xlsx: {e}")
+
+    st.error(
+        f"Unable to load drug_data.xlsx: {e}"
+    )
+
     st.stop()
 
 df.columns = df.columns.str.strip()
@@ -258,10 +446,17 @@ required_cols = [
     "Cost_per_Unit"
 ]
 
-missing_cols = [c for c in required_cols if c not in df.columns]
+missing_cols = [
+    c for c in required_cols
+    if c not in df.columns
+]
 
 if missing_cols:
-    st.error(f"Missing required columns: {', '.join(missing_cols)}")
+
+    st.error(
+        f"Missing required columns: {', '.join(missing_cols)}"
+    )
+
     st.stop()
 
 df["Drug_Name_Clean"] = (
@@ -280,33 +475,42 @@ base_columns = [
 ]
 
 payer_columns = sorted([
-    c for c in df.columns if c not in base_columns
+    c for c in df.columns
+    if c not in base_columns
 ])
 
 drug_list = ["Select Drug"] + sorted(
-    df["Drug_Name"].dropna().astype(str).unique()
+    df["Drug_Name"]
+    .dropna()
+    .astype(str)
+    .unique()
 )
 
-unit_list = ["mgs", "mcgs", "units"]
+unit_list = [
+    "mgs",
+    "mcgs",
+    "units"
+]
 
-# -------------------------
+# ---------------------------------------------------
 # SESSION STATE
-# -------------------------
+# ---------------------------------------------------
+
 if "meds" not in st.session_state:
-    st.session_state.meds = [
-        {
-            "drug": "Select Drug",
-            "dose": float(0.0),
-            "unit": "mgs"
-        }
-    ]
+
+    st.session_state.meds = [{
+        "drug": "Select Drug",
+        "dose": float(0.0),
+        "unit": "mgs"
+    }]
 
 if "show_summary" not in st.session_state:
     st.session_state.show_summary = False
 
-# -------------------------
+# ---------------------------------------------------
 # PATIENT INFO
-# -------------------------
+# ---------------------------------------------------
+
 st.subheader("🧑 Patient Information")
 
 providers = sorted([
@@ -318,24 +522,32 @@ providers = sorted([
 today = date.today()
 
 max_dob = today - timedelta(days=1)
+
 min_dob = date(1900, 1, 1)
+
 default_dob = date(2000, 1, 1)
 
 c1, c2, c3 = st.columns(3)
 
 with c1:
-    patient_name = st.text_input("Patient Name")
+
+    patient_name = st.text_input(
+        "Patient Name"
+    )
 
     dob = st.date_input(
         "Date of Birth",
         value=default_dob,
         min_value=min_dob,
-        max_value=max_dob,
-        help="Select a birth date between 01-01-1900 and yesterday."
+        max_value=max_dob
     )
 
 with c2:
-    provider = st.selectbox("Provider", providers)
+
+    provider = st.selectbox(
+        "Provider",
+        providers
+    )
 
     treatment_date = st.date_input(
         "Date of Treatment",
@@ -343,27 +555,33 @@ with c2:
     )
 
 with c3:
+
     location = st.selectbox(
         "Clinic Location",
-        ["Downtown", "Live Oak", "Mission Trail", "Stone Oak"]
+        [
+            "Downtown",
+            "Live Oak",
+            "Mission Trail",
+            "Stone Oak"
+        ]
     )
 
-# -------------------------
+# ---------------------------------------------------
 # INSURANCE
-# -------------------------
+# ---------------------------------------------------
+
 st.subheader("🏥 Insurance")
 
-if not payer_columns:
-    st.error("No insurance payer columns found in Excel file.")
-    st.stop()
-
-payer = st.selectbox("Primary Insurance", payer_columns)
+payer = st.selectbox(
+    "Primary Insurance",
+    payer_columns
+)
 
 primary_pct = st.slider(
     "Primary Coverage %",
-    min_value=0,
-    max_value=100,
-    value=80
+    0,
+    100,
+    80
 )
 
 copay = st.number_input(
@@ -373,14 +591,20 @@ copay = st.number_input(
     step=1.0
 )
 
-has_secondary = st.checkbox("Has Secondary Insurance")
+has_secondary = st.checkbox(
+    "Has Secondary Insurance"
+)
 
 secondary_selected = None
 secondary_text = ""
 
 if has_secondary:
 
-    options = ["Select"] + payer_columns + ["Other / Funding"]
+    options = (
+        ["Select"]
+        + payer_columns
+        + ["Other / Funding"]
+    )
 
     secondary_selected = st.selectbox(
         "Secondary Insurance",
@@ -388,13 +612,15 @@ if has_secondary:
     )
 
     if secondary_selected == "Other / Funding":
+
         secondary_text = st.text_input(
             "Other / Funding Details"
         )
 
-# -------------------------
+# ---------------------------------------------------
 # MEDICATIONS
-# -------------------------
+# ---------------------------------------------------
+
 st.subheader("💉 Medications")
 
 any_selected = any(
@@ -406,24 +632,30 @@ if st.button(
     "🔄 Reset Medications",
     disabled=not any_selected
 ):
-    st.session_state.meds = [
-        {
-            "drug": "Select Drug",
-            "dose": float(0.0),
-            "unit": "mgs"
-        }
-    ]
+
+    st.session_state.meds = [{
+        "drug": "Select Drug",
+        "dose": float(0.0),
+        "unit": "mgs"
+    }]
 
     st.session_state.show_summary = False
+
     st.rerun()
 
 updated = []
 
-for i, med in enumerate(st.session_state.meds):
+for i, med in enumerate(
+    st.session_state.meds
+):
 
-    col1, col2, col3, col4 = st.columns([3, 2, 2, 1.5])
+    col1, col2, col3, col4 = st.columns(
+        [3, 2, 2, 1.5]
+    )
 
-    current_drug = str(med.get("drug", "Select Drug"))
+    current_drug = str(
+        med.get("drug", "Select Drug")
+    )
 
     current_dose = float(
         med.get("dose", 0.0) or 0.0
@@ -485,6 +717,7 @@ for i, med in enumerate(st.session_state.meds):
         st.session_state.show_summary = False
 
         if i == 0:
+
             updated.append({
                 "drug": "Select Drug",
                 "dose": float(0.0),
@@ -500,13 +733,12 @@ for i, med in enumerate(st.session_state.meds):
     })
 
 if len(updated) == 0:
-    updated = [
-        {
-            "drug": "Select Drug",
-            "dose": float(0.0),
-            "unit": "mgs"
-        }
-    ]
+
+    updated = [{
+        "drug": "Select Drug",
+        "dose": float(0.0),
+        "unit": "mgs"
+    }]
 
 st.session_state.meds = updated
 
@@ -519,43 +751,48 @@ if st.button("➕ Add Medication"):
     })
 
     st.session_state.show_summary = False
+
     st.rerun()
 
-# -------------------------
+# ---------------------------------------------------
 # CALCULATE
-# -------------------------
+# ---------------------------------------------------
+
 if st.button("Calculate"):
 
     total_cost = 0.0
     total_allowed = 0.0
+
     missing = []
-
-    if dob is None:
-        st.error("Select a valid date of birth.")
-        st.stop()
-
-    if dob < min_dob or dob > max_dob:
-        st.error(
-            "Date of birth must be between 01-01-1900 and yesterday."
-        )
-        st.stop()
 
     for entry in st.session_state.meds:
 
-        drug_name = str(entry.get("drug", "")).strip()
-        dose_value = float(entry.get("dose", 0.0) or 0.0)
-        unit_value = str(entry.get("unit", "")).strip()
+        drug_name = str(
+            entry.get("drug", "")
+        ).strip()
+
+        dose_value = float(
+            entry.get("dose", 0.0) or 0.0
+        )
+
+        unit_value = str(
+            entry.get("unit", "")
+        ).strip()
 
         if drug_name == "Select Drug":
-            st.error("Please select a drug.")
+
+            st.error(
+                "Please select a drug."
+            )
+
             st.stop()
 
         if dose_value <= 0:
-            st.error(f"Invalid dose for {drug_name}.")
-            st.stop()
 
-        if unit_value == "":
-            st.error(f"Please select units for {drug_name}.")
+            st.error(
+                f"Invalid dose for {drug_name}."
+            )
+
             st.stop()
 
         filtered = df[
@@ -564,7 +801,9 @@ if st.button("Calculate"):
         ]
 
         if filtered.empty:
+
             missing.append(drug_name)
+
             continue
 
         data = filtered.iloc[0]
@@ -582,9 +821,11 @@ if st.button("Calculate"):
         )
 
         if billing_unit <= 0:
+
             st.error(
                 f"Invalid billing unit for {drug_name}."
             )
+
             st.stop()
 
         dose_mg = convert_to_mg(
@@ -597,25 +838,39 @@ if st.button("Calculate"):
         )
 
         total_cost += units * cost
+
         total_allowed += units * allowable
 
     if missing:
+
         st.warning(
-            "Missing drugs: " + ", ".join(missing)
+            "Missing drugs: "
+            + ", ".join(missing)
         )
 
     primary_payment = (
-        total_allowed * (primary_pct / 100)
+        total_allowed
+        * (primary_pct / 100)
     )
 
-    remaining = total_allowed - primary_payment
+    remaining = (
+        total_allowed
+        - primary_payment
+    )
 
     if has_secondary:
+
         secondary_payment = remaining
+
         patient_payment = copay
+
     else:
+
         secondary_payment = 0.0
-        patient_payment = remaining + copay
+
+        patient_payment = (
+            remaining + copay
+        )
 
     st.session_state.summary = {
         "cost": float(total_cost),
@@ -626,14 +881,17 @@ if st.button("Calculate"):
 
     st.session_state.show_summary = True
 
-# -------------------------
+# ---------------------------------------------------
 # SUMMARY
-# -------------------------
+# ---------------------------------------------------
+
 if st.session_state.show_summary:
 
     s = st.session_state.summary
 
-    st.subheader("💰 Financial Summary")
+    st.subheader(
+        "💰 Financial Summary"
+    )
 
     c1, c2, c3 = st.columns(3)
 
@@ -653,6 +911,7 @@ if st.session_state.show_summary:
     )
 
     if has_secondary:
+
         st.metric(
             "Secondary Pays",
             f"${s['secondary']:,.2f}"
