@@ -1,8 +1,5 @@
 # Updated app.py
 
-Replace your existing `app.py` with the code below.
-
-```python
 import streamlit as st
 import pandas as pd
 import math
