@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# ULTRA MODERN MEDICAL DASHBOARD UI
+# ULTRA MODERN MEDICAL UI
 # ---------------------------------------------------
 
 st.markdown("""
@@ -30,7 +30,6 @@ st.markdown("""
 
     --primary: #4c6fff;
     --primary-dark: #3d5df3;
-    --primary-soft: #eef3ff;
 
     --success: #17c964;
 
@@ -38,7 +37,7 @@ st.markdown("""
 
     --bg: #f6f8fc;
 
-    --card: rgba(255,255,255,0.84);
+    --card: rgba(255,255,255,0.86);
 
     --text: #14213d;
 
@@ -109,15 +108,15 @@ body,
     background:
         linear-gradient(
             135deg,
-            rgba(255,255,255,0.95),
-            rgba(255,255,255,0.80)
+            rgba(255,255,255,0.96),
+            rgba(255,255,255,0.82)
         );
 
     border-radius: 34px;
 
-    padding: 38px;
+    padding: 40px;
 
-    border: 1px solid rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.88);
 
     box-shadow: var(--shadow);
 
@@ -125,7 +124,7 @@ body,
 
     overflow: hidden;
 
-    margin-bottom: 1.8rem;
+    margin-bottom: 2rem;
 
     backdrop-filter: blur(18px);
 }
@@ -143,13 +142,13 @@ body,
     background:
         radial-gradient(
             circle,
-            rgba(76,111,255,0.12),
+            rgba(76,111,255,0.10),
             transparent 70%
         );
 
     top: -180px;
 
-    right: -140px;
+    right: -120px;
 }
 
 .hero-title {
@@ -169,7 +168,7 @@ body,
 
 .hero-sub {
 
-    margin-top: 10px;
+    margin-top: 12px;
 
     color: var(--muted);
 
@@ -199,7 +198,7 @@ body,
     margin-bottom: 1.4rem;
 }
 
-/* Remove card from hero */
+/* Remove hero card */
 
 [data-testid="stVerticalBlock"] > div:first-child {
 
@@ -233,7 +232,7 @@ div[data-baseweb="select"] > div,
 .stDateInput > div > div,
 .stNumberInput > div > div {
 
-    background: rgba(255,255,255,0.92);
+    background: rgba(255,255,255,0.94);
 
     border: 1px solid #e3eaf8;
 
@@ -351,15 +350,6 @@ div[data-baseweb="input"] input,
 
     background-color:
         rgba(76,111,255,0.18);
-}
-
-/* Alerts */
-
-.stAlert {
-
-    border-radius: 18px;
-
-    border: 1px solid rgba(226,232,240,0.9);
 }
 
 </style>
