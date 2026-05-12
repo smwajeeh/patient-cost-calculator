@@ -7,14 +7,18 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 
+# ---------------------------------------------------
+# PAGE CONFIG
+# ---------------------------------------------------
+
 st.set_page_config(
-    page_title="Treatment Cost Calculator",
+    page_title="Patient Treatment Cost Calculator",
     page_icon="💊",
     layout="wide"
 )
 
 # ---------------------------------------------------
-# MODERN HEALTHCARE THEME
+# MODERN MEDICAL UI THEME
 # ---------------------------------------------------
 
 st.markdown("""
@@ -26,33 +30,35 @@ st.markdown("""
 
     --bg: #f4f7fc;
 
-    --card: rgba(255,255,255,0.92);
+    --card: rgba(255,255,255,0.90);
 
-    --card-strong: #ffffff;
+    --white: #ffffff;
 
-    --text: #172b4d;
+    --text: #14213d;
 
-    --muted: #6b7a90;
+    --muted: #6b7280;
 
-    --primary: #2563eb;
+    --primary: #4f7cff;
 
-    --primary-dark: #1d4ed8;
+    --primary-dark: #3b63dd;
 
-    --primary-light: #dbeafe;
+    --primary-soft: #eef3ff;
 
-    --success: #16a34a;
+    --success: #18b368;
 
-    --danger: #dc2626;
+    --danger: #ff5c5c;
 
-    --border: rgba(148,163,184,0.22);
+    --purple: #8b5cf6;
+
+    --border: rgba(226,232,240,0.95);
 
     --shadow:
-        0 10px 30px rgba(15,23,42,0.08);
+        0 10px 35px rgba(15,23,42,0.06);
 
-    --radius: 20px;
+    --radius: 24px;
 }
 
-/* Hide Streamlit Elements */
+/* Hide Streamlit Branding */
 
 #MainMenu {
     visibility: hidden;
@@ -84,94 +90,96 @@ body,
 .stApp {
 
     background:
-        radial-gradient(
-            circle at top left,
-            rgba(37,99,235,0.08),
-            transparent 28%
-        ),
-
-        radial-gradient(
-            circle at top right,
-            rgba(14,165,233,0.08),
-            transparent 24%
-        ),
-
         linear-gradient(
             180deg,
             #f8fbff 0%,
-            #eef4ff 100%
+            #edf3ff 100%
         );
 }
 
 /* Layout */
 
-[data-testid="stAppViewContainer"] > .main {
-    background: transparent;
-}
-
 .block-container {
+
+    max-width: 1280px;
 
     padding-top: 2rem !important;
 
-    padding-bottom: 3rem !important;
-
-    max-width: 1250px;
+    padding-bottom: 4rem !important;
 }
 
-/* Header */
+/* Main Header */
 
-.main-header {
+.hero {
 
     background:
         linear-gradient(
             135deg,
-            #2563eb 0%,
-            #1d4ed8 100%
+            rgba(255,255,255,0.96),
+            rgba(255,255,255,0.82)
         );
+
+    border-radius: 32px;
 
     padding: 34px;
 
-    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,0.75);
 
-    margin-bottom: 1.5rem;
-
-    box-shadow:
-        0 20px 45px rgba(37,99,235,0.25);
+    box-shadow: var(--shadow);
 
     position: relative;
 
     overflow: hidden;
+
+    margin-bottom: 1.6rem;
+
+    backdrop-filter: blur(12px);
 }
 
-.main-header::before {
+.hero::before {
 
     content: "";
 
     position: absolute;
 
-    width: 320px;
+    width: 420px;
 
-    height: 320px;
+    height: 420px;
 
     background:
-        rgba(255,255,255,0.08);
+        radial-gradient(
+            circle,
+            rgba(79,124,255,0.12),
+            transparent 70%
+        );
 
-    border-radius: 50%;
+    top: -180px;
 
-    top: -140px;
-
-    right: -100px;
+    right: -120px;
 }
 
-.main-title {
+.hero-title {
 
-    color: white;
-
-    font-size: 38px;
+    font-size: 44px;
 
     font-weight: 800;
 
-    letter-spacing: -0.04em;
+    color: var(--text);
+
+    letter-spacing: -0.05em;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.hero-sub {
+
+    margin-top: 10px;
+
+    color: var(--muted);
+
+    font-size: 16px;
 
     position: relative;
 
@@ -182,22 +190,22 @@ body,
 
 [data-testid="stVerticalBlock"] > div {
 
-    background: var(--card);
+    background: rgba(255,255,255,0.80);
 
-    border: 1px solid var(--border);
+    backdrop-filter: blur(14px);
 
-    border-radius: var(--radius);
+    border-radius: 26px;
 
-    padding: 1.4rem;
+    border: 1px solid rgba(255,255,255,0.75);
 
-    margin-bottom: 1rem;
+    padding: 1.6rem;
 
     box-shadow: var(--shadow);
 
-    backdrop-filter: blur(10px);
+    margin-bottom: 1.2rem;
 }
 
-/* Remove card from header */
+/* Remove card from first element */
 
 [data-testid="stVerticalBlock"] > div:first-child {
 
@@ -210,7 +218,7 @@ body,
     padding: 0;
 }
 
-/* Typography */
+/* Section Headers */
 
 h1,
 h2,
@@ -224,14 +232,6 @@ h3,
     letter-spacing: -0.03em;
 }
 
-label,
-p,
-span,
-li {
-
-    color: var(--text);
-}
-
 /* Inputs */
 
 div[data-baseweb="input"] > div,
@@ -239,20 +239,15 @@ div[data-baseweb="select"] > div,
 .stDateInput > div > div,
 .stNumberInput > div > div {
 
-    background: var(--card-strong);
+    background: rgba(255,255,255,0.92);
 
-    border: 1px solid #dbe3f0;
+    border: 1px solid #dfe7f5;
 
-    border-radius: 14px;
+    border-radius: 16px;
+
+    min-height: 52px;
 
     transition: all 0.18s ease;
-}
-
-div[data-baseweb="input"] input,
-.stDateInput input,
-.stNumberInput input {
-
-    color: var(--text);
 }
 
 div[data-baseweb="input"]:focus-within,
@@ -263,7 +258,14 @@ div[data-baseweb="select"]:focus-within,
     border-color: var(--primary);
 
     box-shadow:
-        0 0 0 4px rgba(37,99,235,0.12);
+        0 0 0 4px rgba(79,124,255,0.12);
+}
+
+div[data-baseweb="input"] input,
+.stNumberInput input,
+.stDateInput input {
+
+    color: var(--text);
 }
 
 /* Buttons */
@@ -282,16 +284,16 @@ div[data-baseweb="select"]:focus-within,
 
     border: none;
 
-    border-radius: 14px;
+    border-radius: 16px;
 
-    padding: 0.72rem 1.2rem;
+    padding: 0.72rem 1.4rem;
 
     font-weight: 700;
 
     transition: all 0.18s ease;
 
     box-shadow:
-        0 10px 24px rgba(37,99,235,0.24);
+        0 12px 24px rgba(79,124,255,0.22);
 }
 
 .stButton > button:hover,
@@ -300,18 +302,18 @@ div[data-baseweb="select"]:focus-within,
     transform: translateY(-2px);
 
     box-shadow:
-        0 16px 32px rgba(37,99,235,0.32);
+        0 18px 32px rgba(79,124,255,0.28);
 }
 
-/* Delete Button */
+/* Delete Buttons */
 
 button[kind="secondary"] {
 
     background:
         linear-gradient(
             135deg,
-            #ef4444,
-            #dc2626
+            #ff7a7a,
+            #ff5c5c
         ) !important;
 
     color: white !important;
@@ -324,18 +326,18 @@ button[kind="secondary"] {
     background:
         linear-gradient(
             180deg,
-            #ffffff,
-            #f8fbff
+            rgba(255,255,255,0.92),
+            rgba(248,251,255,0.88)
         );
 
-    border: 1px solid #e5edf8;
+    border-radius: 22px;
 
-    border-radius: 20px;
+    border: 1px solid rgba(226,232,240,0.9);
 
     padding: 1rem;
 
     box-shadow:
-        0 8px 20px rgba(15,23,42,0.05);
+        0 8px 24px rgba(15,23,42,0.04);
 }
 
 [data-testid="stMetricLabel"] {
@@ -351,26 +353,29 @@ button[kind="secondary"] {
 
     font-weight: 800;
 
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
 }
 
 /* Slider */
 
 .stSlider [data-baseweb="slider"] [role="slider"] {
+
     background-color: var(--primary);
 }
 
 .stSlider [data-baseweb="slider"] > div > div {
-    background-color: rgba(37,99,235,0.2);
+
+    background-color:
+        rgba(79,124,255,0.20);
 }
 
 /* Alerts */
 
 .stAlert {
 
-    border-radius: 16px;
+    border-radius: 18px;
 
-    border: 1px solid rgba(148,163,184,0.2);
+    border: 1px solid rgba(226,232,240,0.9);
 }
 
 /* Scrollbar */
@@ -381,27 +386,32 @@ button[kind="secondary"] {
 
 ::-webkit-scrollbar-thumb {
 
-    background: #cbd5e1;
+    background: #cfd8ea;
 
     border-radius: 20px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+
+    background: #a8b6d6;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------
-# HEADER
+# HERO SECTION
 # ---------------------------------------------------
 
 st.markdown("""
-<div class="main-header">
+<div class="hero">
 
-    <div class="main-title">
+    <div class="hero-title">
         💊 Patient Treatment Cost Calculator
+    </div>
+
+    <div class="hero-sub">
+        Accurate treatment estimates for informed healthcare decisions
     </div>
 
 </div>
@@ -476,7 +486,7 @@ def generate_pdf(data):
     return buffer
 
 # ---------------------------------------------------
-# LOAD EXCEL DATA
+# LOAD DATA
 # ---------------------------------------------------
 
 try:
@@ -563,7 +573,7 @@ if "show_summary" not in st.session_state:
     st.session_state.show_summary = False
 
 # ---------------------------------------------------
-# PATIENT INFORMATION
+# PATIENT INFO
 # ---------------------------------------------------
 
 st.subheader("🧑 Patient Information")
@@ -683,20 +693,38 @@ any_selected = any(
     for m in st.session_state.meds
 )
 
-if st.button(
-    "🔄 Reset Medications",
-    disabled=not any_selected
-):
+colA, colB = st.columns([1,1])
 
-    st.session_state.meds = [{
-        "drug": "Select Drug",
-        "dose": float(0.0),
-        "unit": "mgs"
-    }]
+with colA:
 
-    st.session_state.show_summary = False
+    if st.button(
+        "🔄 Reset Medications",
+        disabled=not any_selected
+    ):
 
-    st.rerun()
+        st.session_state.meds = [{
+            "drug": "Select Drug",
+            "dose": float(0.0),
+            "unit": "mgs"
+        }]
+
+        st.session_state.show_summary = False
+
+        st.rerun()
+
+with colB:
+
+    if st.button("➕ Add Medication"):
+
+        st.session_state.meds.append({
+            "drug": "Select Drug",
+            "dose": float(0.0),
+            "unit": "mgs"
+        })
+
+        st.session_state.show_summary = False
+
+        st.rerun()
 
 updated = []
 
@@ -705,7 +733,7 @@ for i, med in enumerate(
 ):
 
     col1, col2, col3, col4 = st.columns(
-        [3, 2, 2, 1.5]
+        [4,2,2,1]
     )
 
     current_drug = str(
@@ -753,22 +781,12 @@ for i, med in enumerate(
         key=f"u{i}"
     )
 
-    col4.markdown(
-        "<br>",
-        unsafe_allow_html=True
-    )
+    col4.markdown("<br>", unsafe_allow_html=True)
 
     delete = col4.button(
-        "Delete 🗑️",
+        "🗑️",
         key=f"del{i}"
     )
-
-    if (
-        drug != current_drug
-        or float(dose) != float(current_dose)
-        or unit != current_unit
-    ):
-        st.session_state.show_summary = False
 
     if delete:
 
@@ -800,23 +818,13 @@ if len(updated) == 0:
 
 st.session_state.meds = updated
 
-if st.button("➕ Add Medication"):
-
-    st.session_state.meds.append({
-        "drug": "Select Drug",
-        "dose": float(0.0),
-        "unit": "mgs"
-    })
-
-    st.session_state.show_summary = False
-
-    st.rerun()
-
 # ---------------------------------------------------
 # CALCULATE
 # ---------------------------------------------------
 
-if st.button("Calculate"):
+st.markdown("<br>", unsafe_allow_html=True)
+
+if st.button("🧮 Calculate"):
 
     total_cost = 0.0
 
@@ -952,7 +960,7 @@ if st.session_state.show_summary:
         "💰 Financial Summary"
     )
 
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3, c4 = st.columns(4)
 
     c1.metric(
         "Total Cost",
@@ -965,56 +973,57 @@ if st.session_state.show_summary:
     )
 
     c3.metric(
+        "Secondary Pays",
+        f"${s['secondary']:,.2f}"
+    )
+
+    c4.metric(
         "Patient Pays",
         f"${s['patient']:,.2f}"
     )
 
-    if has_secondary:
-
-        st.metric(
-            "Secondary Pays",
-            f"${s['secondary']:,.2f}"
-        )
-
-    st.subheader("🧾 Summary")
+    st.subheader("🧾 Summary Details")
 
     st.markdown(f"""
-**Patient Name:** {patient_name}
+### Patient Information
 
-**Provider:** {provider}
+- **Patient Name:** {patient_name}
+- **Provider:** {provider}
+- **Date of Birth:** {format_date_us(dob)}
+- **Treatment Date:** {format_date_us(treatment_date)}
+- **Clinic Location:** {location}
 
-**Treatment Date:** {format_date_us(treatment_date)}
+### Insurance
 
-**Date of Birth:** {format_date_us(dob)}
+- **Primary Insurance:** {payer}
+- **Coverage:** {primary_pct}%
+- **Copay:** ${copay:,.2f}
 
-**Location:** {location}
+### Financial Summary
 
-**Primary Insurance:** {payer}
-
-**Total Cost:** ${s['cost']:,.2f}
-
-**Primary Insurance Pays:** ${s['primary']:,.2f}
-
-**Secondary Insurance Pays:** ${s['secondary']:,.2f}
-
-**Patient Responsibility:** ${s['patient']:,.2f}
+- **Total Cost:** ${s['cost']:,.2f}
+- **Primary Insurance Pays:** ${s['primary']:,.2f}
+- **Secondary Insurance Pays:** ${s['secondary']:,.2f}
+- **Patient Responsibility:** ${s['patient']:,.2f}
 """)
 
     pdf = generate_pdf([
         f"Patient Name: {patient_name}",
         f"Provider: {provider}",
-        f"Treatment Date: {format_date_us(treatment_date)}",
         f"Date of Birth: {format_date_us(dob)}",
-        f"Location: {location}",
+        f"Treatment Date: {format_date_us(treatment_date)}",
+        f"Clinic Location: {location}",
         f"Primary Insurance: {payer}",
+        f"Coverage: {primary_pct}%",
+        f"Copay: ${copay:,.2f}",
         f"Total Cost: ${s['cost']:,.2f}",
-        f"Primary Insurance Pays: ${s['primary']:,.2f}",
-        f"Secondary Insurance Pays: ${s['secondary']:,.2f}",
-        f"Patient Responsibility: ${s['patient']:,.2f}"
+        f"Primary Pays: ${s['primary']:,.2f}",
+        f"Secondary Pays: ${s['secondary']:,.2f}",
+        f"Patient Pays: ${s['patient']:,.2f}"
     ])
 
     st.download_button(
-        "📄 Download PDF",
+        "📄 Download PDF Report",
         pdf,
-        "report.pdf"
+        "patient_treatment_report.pdf"
     )
