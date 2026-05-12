@@ -1,5 +1,3 @@
-# Updated app.py
-
 import streamlit as st
 import pandas as pd
 import math
@@ -35,13 +33,8 @@ st.markdown("""
     --primary-soft: #eef3ff;
 
     --success: #17c964;
-    --success-soft: #ecfff4;
 
     --danger: #ff5b5b;
-    --danger-soft: #fff1f1;
-
-    --purple: #8b5cf6;
-    --purple-soft: #f4efff;
 
     --bg: #f6f8fc;
 
@@ -59,6 +52,8 @@ st.markdown("""
     --radius: 28px;
 }
 
+/* Hide Streamlit */
+
 #MainMenu {
     visibility: hidden;
 }
@@ -74,6 +69,8 @@ header {
 [data-testid="stToolbar"] {
     display: none !important;
 }
+
+/* Global */
 
 html,
 body,
@@ -94,6 +91,8 @@ body,
         );
 }
 
+/* Layout */
+
 .block-container {
 
     max-width: 1320px;
@@ -102,6 +101,8 @@ body,
 
     padding-bottom: 4rem !important;
 }
+
+/* Hero */
 
 .hero {
 
@@ -179,6 +180,8 @@ body,
     z-index: 2;
 }
 
+/* Cards */
+
 [data-testid="stVerticalBlock"] > div {
 
     background: rgba(255,255,255,0.72);
@@ -196,6 +199,8 @@ body,
     margin-bottom: 1.4rem;
 }
 
+/* Remove card from hero */
+
 [data-testid="stVerticalBlock"] > div:first-child {
 
     background: transparent;
@@ -206,6 +211,8 @@ body,
 
     padding: 0;
 }
+
+/* Headers */
 
 h1,
 h2,
@@ -218,6 +225,8 @@ h3,
 
     letter-spacing: -0.03em;
 }
+
+/* Inputs */
 
 div[data-baseweb="input"] > div,
 div[data-baseweb="select"] > div,
@@ -255,6 +264,8 @@ div[data-baseweb="input"] input,
     font-size: 15px;
 }
 
+/* Buttons */
+
 .stButton > button,
 .stDownloadButton > button {
 
@@ -290,17 +301,7 @@ div[data-baseweb="input"] input,
         0 20px 36px rgba(76,111,255,0.30);
 }
 
-button[kind="secondary"] {
-
-    background:
-        linear-gradient(
-            135deg,
-            #ff8a8a,
-            #ff5b5b
-        ) !important;
-
-    color: white !important;
-}
+/* Metrics */
 
 [data-testid="stMetric"] {
 
@@ -337,6 +338,8 @@ button[kind="secondary"] {
     letter-spacing: -0.03em;
 }
 
+/* Slider */
+
 .stSlider [data-baseweb="slider"] [role="slider"] {
 
     background-color: var(--primary);
@@ -350,27 +353,13 @@ button[kind="secondary"] {
         rgba(76,111,255,0.18);
 }
 
+/* Alerts */
+
 .stAlert {
 
     border-radius: 18px;
 
     border: 1px solid rgba(226,232,240,0.9);
-}
-
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-
-    background: #d4ddf1;
-
-    border-radius: 20px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-
-    background: #b9c7e8;
 }
 
 </style>
@@ -633,75 +622,21 @@ copay = st.number_input(
     step=1.0
 )
 
-has_secondary = st.checkbox(
-    "Has Secondary Insurance"
-)
-
-secondary_selected = None
-secondary_text = ""
-
-if has_secondary:
-
-    options = (
-        ["Select"]
-        + payer_columns
-        + ["Other / Funding"]
-    )
-
-    secondary_selected = st.selectbox(
-        "Secondary Insurance",
-        options
-    )
-
-    if secondary_selected == "Other / Funding":
-
-        secondary_text = st.text_input(
-            "Other / Funding Details"
-        )
-
 # ---------------------------------------------------
 # MEDICATIONS
 # ---------------------------------------------------
 
 st.subheader("💉 Medications")
 
-any_selected = any(
-    m["drug"] != "Select Drug"
-    for m in st.session_state.meds
-)
+if st.button("➕ Add Medication"):
 
-colA, colB = st.columns([1,1])
+    st.session_state.meds.append({
+        "drug": "Select Drug",
+        "dose": float(0.0),
+        "unit": "mgs"
+    })
 
-with colA:
-
-    if st.button(
-        "🔄 Reset Medications",
-        disabled=not any_selected
-    ):
-
-        st.session_state.meds = [{
-            "drug": "Select Drug",
-            "dose": float(0.0),
-            "unit": "mgs"
-        }]
-
-        st.session_state.show_summary = False
-
-        st.rerun()
-
-with colB:
-
-    if st.button("➕ Add Medication"):
-
-        st.session_state.meds.append({
-            "drug": "Select Drug",
-            "dose": float(0.0),
-            "unit": "mgs"
-        })
-
-        st.session_state.show_summary = False
-
-        st.rerun()
+    st.rerun()
 
 updated = []
 
@@ -709,8 +644,8 @@ for i, med in enumerate(
     st.session_state.meds
 ):
 
-    col1, col2, col3, col4 = st.columns(
-        [4,2,2,1]
+    col1, col2, col3 = st.columns(
+        [4,2,2]
     )
 
     current_drug = str(
@@ -724,9 +659,6 @@ for i, med in enumerate(
     current_unit = str(
         med.get("unit", "mgs")
     )
-
-    if current_unit not in unit_list:
-        current_unit = "mgs"
 
     drug = col1.selectbox(
         "Drug",
@@ -758,40 +690,11 @@ for i, med in enumerate(
         key=f"u{i}"
     )
 
-    col4.markdown("<br>", unsafe_allow_html=True)
-
-    delete = col4.button(
-        "🗑️",
-        key=f"del{i}"
-    )
-
-    if delete:
-
-        st.session_state.show_summary = False
-
-        if i == 0:
-
-            updated.append({
-                "drug": "Select Drug",
-                "dose": float(0.0),
-                "unit": "mgs"
-            })
-
-        continue
-
     updated.append({
         "drug": drug,
         "dose": float(dose),
         "unit": unit
     })
-
-if len(updated) == 0:
-
-    updated = [{
-        "drug": "Select Drug",
-        "dose": float(0.0),
-        "unit": "mgs"
-    }]
 
 st.session_state.meds = updated
 
@@ -807,8 +710,6 @@ if st.button("🧮 Calculate"):
 
     total_allowed = 0.0
 
-    missing = []
-
     for entry in st.session_state.meds:
 
         drug_name = str(
@@ -823,31 +724,12 @@ if st.button("🧮 Calculate"):
             entry.get("unit", "")
         ).strip()
 
-        if drug_name == "Select Drug":
-
-            st.error(
-                "Please select a drug."
-            )
-
-            st.stop()
-
-        if dose_value <= 0:
-
-            st.error(
-                f"Invalid dose for {drug_name}."
-            )
-
-            st.stop()
-
         filtered = df[
             df["Drug_Name_Clean"]
             == drug_name.lower()
         ]
 
         if filtered.empty:
-
-            missing.append(drug_name)
-
             continue
 
         data = filtered.iloc[0]
@@ -864,14 +746,6 @@ if st.button("🧮 Calculate"):
             data[payer]
         )
 
-        if billing_unit <= 0:
-
-            st.error(
-                f"Invalid billing unit for {drug_name}."
-            )
-
-            st.stop()
-
         dose_mg = convert_to_mg(
             dose_value,
             unit_value
@@ -885,41 +759,20 @@ if st.button("🧮 Calculate"):
 
         total_allowed += units * allowable
 
-    if missing:
-
-        st.warning(
-            "Missing drugs: "
-            + ", ".join(missing)
-        )
-
     primary_payment = (
         total_allowed
         * (primary_pct / 100)
     )
 
-    remaining = (
+    patient_payment = (
         total_allowed
         - primary_payment
+        + copay
     )
-
-    if has_secondary:
-
-        secondary_payment = remaining
-
-        patient_payment = copay
-
-    else:
-
-        secondary_payment = 0.0
-
-        patient_payment = (
-            remaining + copay
-        )
 
     st.session_state.summary = {
         "cost": float(total_cost),
         "primary": float(primary_payment),
-        "secondary": float(secondary_payment),
         "patient": float(patient_payment)
     }
 
@@ -937,7 +790,7 @@ if st.session_state.show_summary:
         "💰 Financial Summary"
     )
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3 = st.columns(3)
 
     c1.metric(
         "Total Cost",
@@ -950,52 +803,13 @@ if st.session_state.show_summary:
     )
 
     c3.metric(
-        "Secondary Pays",
-        f"${s['secondary']:,.2f}"
-    )
-
-    c4.metric(
         "Patient Pays",
         f"${s['patient']:,.2f}"
     )
 
-    st.subheader("🧾 Summary Details")
-
-    st.markdown(f"""
-### Patient Information
-
-- **Patient Name:** {patient_name}
-- **Provider:** {provider}
-- **Date of Birth:** {format_date_us(dob)}
-- **Treatment Date:** {format_date_us(treatment_date)}
-- **Clinic Location:** {location}
-
-### Insurance
-
-- **Primary Insurance:** {payer}
-- **Coverage:** {primary_pct}%
-- **Copay:** ${copay:,.2f}
-
-### Financial Summary
-
-- **Total Cost:** ${s['cost']:,.2f}
-- **Primary Insurance Pays:** ${s['primary']:,.2f}
-- **Secondary Insurance Pays:** ${s['secondary']:,.2f}
-- **Patient Responsibility:** ${s['patient']:,.2f}
-""")
-
     pdf = generate_pdf([
-        f"Patient Name: {patient_name}",
-        f"Provider: {provider}",
-        f"Date of Birth: {format_date_us(dob)}",
-        f"Treatment Date: {format_date_us(treatment_date)}",
-        f"Clinic Location: {location}",
-        f"Primary Insurance: {payer}",
-        f"Coverage: {primary_pct}%",
-        f"Copay: ${copay:,.2f}",
         f"Total Cost: ${s['cost']:,.2f}",
         f"Primary Pays: ${s['primary']:,.2f}",
-        f"Secondary Pays: ${s['secondary']:,.2f}",
         f"Patient Pays: ${s['patient']:,.2f}"
     ])
 
@@ -1004,4 +818,3 @@ if st.session_state.show_summary:
         pdf,
         "patient_treatment_report.pdf"
     )
-```
