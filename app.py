@@ -16,31 +16,43 @@ st.set_page_config(
 # ---------------------------------------------------
 # MODERN HEALTHCARE THEME
 # ---------------------------------------------------
+
 st.markdown("""
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
+
     --bg: #f4f7fc;
+
     --card: rgba(255,255,255,0.92);
+
     --card-strong: #ffffff;
+
     --text: #172b4d;
+
     --muted: #6b7a90;
+
     --primary: #2563eb;
+
     --primary-dark: #1d4ed8;
+
     --primary-light: #dbeafe;
+
     --success: #16a34a;
+
     --danger: #dc2626;
-    --border: rgba(148, 163, 184, 0.25);
+
+    --border: rgba(148,163,184,0.22);
 
     --shadow:
-        0 10px 30px rgba(15, 23, 42, 0.08);
+        0 10px 30px rgba(15,23,42,0.08);
 
     --radius: 20px;
 }
 
-/* Hide Streamlit junk */
+/* Hide Streamlit Elements */
 
 #MainMenu {
     visibility: hidden;
@@ -63,19 +75,26 @@ header {
 html,
 body,
 [class*="css"] {
+
     font-family: 'Inter', sans-serif;
+
     color: var(--text);
 }
 
 .stApp {
-    background:
-        radial-gradient(circle at top left,
-            rgba(37,99,235,0.08),
-            transparent 28%),
 
-        radial-gradient(circle at top right,
-            rgba(14,165,233,0.10),
-            transparent 24%),
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(37,99,235,0.08),
+            transparent 28%
+        ),
+
+        radial-gradient(
+            circle at top right,
+            rgba(14,165,233,0.08),
+            transparent 24%
+        ),
 
         linear-gradient(
             180deg,
@@ -84,21 +103,25 @@ body,
         );
 }
 
-/* Container */
+/* Layout */
 
 [data-testid="stAppViewContainer"] > .main {
     background: transparent;
 }
 
 .block-container {
+
     padding-top: 2rem !important;
+
     padding-bottom: 3rem !important;
+
     max-width: 1250px;
 }
 
 /* Header */
 
 .main-header {
+
     background:
         linear-gradient(
             135deg,
@@ -106,61 +129,66 @@ body,
             #1d4ed8 100%
         );
 
-    padding: 32px;
-    border-radius: 28px;
+    padding: 34px;
 
-    color: white;
+    border-radius: 28px;
 
     margin-bottom: 1.5rem;
 
     box-shadow:
-        0 18px 40px rgba(37,99,235,0.25);
+        0 20px 45px rgba(37,99,235,0.25);
 
     position: relative;
+
     overflow: hidden;
 }
 
 .main-header::before {
+
     content: "";
+
     position: absolute;
 
-    width: 280px;
-    height: 280px;
+    width: 320px;
 
-    background: rgba(255,255,255,0.08);
+    height: 320px;
+
+    background:
+        rgba(255,255,255,0.08);
 
     border-radius: 50%;
 
-    top: -120px;
-    right: -80px;
+    top: -140px;
+
+    right: -100px;
 }
 
 .main-title {
-    font-size: 36px;
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    position: relative;
-    z-index: 2;
-}
 
-.main-subtitle {
-    margin-top: 8px;
-    opacity: 0.92;
-    font-size: 15px;
+    color: white;
+
+    font-size: 38px;
+
+    font-weight: 800;
+
+    letter-spacing: -0.04em;
+
     position: relative;
+
     z-index: 2;
 }
 
 /* Cards */
 
 [data-testid="stVerticalBlock"] > div {
+
     background: var(--card);
 
     border: 1px solid var(--border);
 
     border-radius: var(--radius);
 
-    padding: 1.35rem;
+    padding: 1.4rem;
 
     margin-bottom: 1rem;
 
@@ -169,12 +197,16 @@ body,
     backdrop-filter: blur(10px);
 }
 
-/* Remove card from first element */
+/* Remove card from header */
 
 [data-testid="stVerticalBlock"] > div:first-child {
+
     background: transparent;
+
     border: none;
+
     box-shadow: none;
+
     padding: 0;
 }
 
@@ -184,8 +216,11 @@ h1,
 h2,
 h3,
 .stSubheader {
+
     color: var(--text);
+
     font-weight: 700;
+
     letter-spacing: -0.03em;
 }
 
@@ -193,6 +228,7 @@ label,
 p,
 span,
 li {
+
     color: var(--text);
 }
 
@@ -215,6 +251,7 @@ div[data-baseweb="select"] > div,
 div[data-baseweb="input"] input,
 .stDateInput input,
 .stNumberInput input {
+
     color: var(--text);
 }
 
@@ -237,8 +274,8 @@ div[data-baseweb="select"]:focus-within,
     background:
         linear-gradient(
             135deg,
-            var(--primary) 0%,
-            var(--primary-dark) 100%
+            var(--primary),
+            var(--primary-dark)
         );
 
     color: white;
@@ -263,7 +300,7 @@ div[data-baseweb="select"]:focus-within,
     transform: translateY(-2px);
 
     box-shadow:
-        0 16px 30px rgba(37,99,235,0.30);
+        0 16px 32px rgba(37,99,235,0.32);
 }
 
 /* Delete Button */
@@ -287,8 +324,8 @@ button[kind="secondary"] {
     background:
         linear-gradient(
             180deg,
-            #ffffff 0%,
-            #f8fbff 100%
+            #ffffff,
+            #f8fbff
         );
 
     border: 1px solid #e5edf8;
@@ -302,21 +339,19 @@ button[kind="secondary"] {
 }
 
 [data-testid="stMetricLabel"] {
+
     color: var(--muted);
+
     font-weight: 600;
 }
 
 [data-testid="stMetricValue"] {
+
     color: var(--primary-dark);
+
     font-weight: 800;
+
     letter-spacing: -0.04em;
-}
-
-/* Alerts */
-
-.stAlert {
-    border-radius: 16px;
-    border: 1px solid rgba(148,163,184,0.2);
 }
 
 /* Slider */
@@ -329,6 +364,15 @@ button[kind="secondary"] {
     background-color: rgba(37,99,235,0.2);
 }
 
+/* Alerts */
+
+.stAlert {
+
+    border-radius: 16px;
+
+    border: 1px solid rgba(148,163,184,0.2);
+}
+
 /* Scrollbar */
 
 ::-webkit-scrollbar {
@@ -336,7 +380,9 @@ button[kind="secondary"] {
 }
 
 ::-webkit-scrollbar-thumb {
+
     background: #cbd5e1;
+
     border-radius: 20px;
 }
 
@@ -347,15 +393,17 @@ button[kind="secondary"] {
 </style>
 """, unsafe_allow_html=True)
 
+# ---------------------------------------------------
+# HEADER
+# ---------------------------------------------------
+
 st.markdown("""
 <div class="main-header">
+
     <div class="main-title">
         💊 Patient Treatment Cost Calculator
     </div>
 
-    <div class="main-subtitle">
-        Modern healthcare financial estimation dashboard
-    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -368,7 +416,10 @@ def extract_number(value):
     if pd.isna(value):
         return 0.0
 
-    number = re.findall(r"[\d\.]+", str(value))
+    number = re.findall(
+        r"[\d\.]+",
+        str(value)
+    )
 
     return float(number[0]) if number else 0.0
 
@@ -384,6 +435,7 @@ def convert_to_mg(dose, unit):
 
 
 def format_date_us(d):
+
     return d.strftime("%m-%d-%Y")
 
 
@@ -424,11 +476,14 @@ def generate_pdf(data):
     return buffer
 
 # ---------------------------------------------------
-# LOAD DATA
+# LOAD EXCEL DATA
 # ---------------------------------------------------
 
 try:
-    df = pd.read_excel("drug_data.xlsx")
+
+    df = pd.read_excel(
+        "drug_data.xlsx"
+    )
 
 except Exception as e:
 
@@ -508,7 +563,7 @@ if "show_summary" not in st.session_state:
     st.session_state.show_summary = False
 
 # ---------------------------------------------------
-# PATIENT INFO
+# PATIENT INFORMATION
 # ---------------------------------------------------
 
 st.subheader("🧑 Patient Information")
@@ -698,7 +753,10 @@ for i, med in enumerate(
         key=f"u{i}"
     )
 
-    col4.markdown("<br>", unsafe_allow_html=True)
+    col4.markdown(
+        "<br>",
+        unsafe_allow_html=True
+    )
 
     delete = col4.button(
         "Delete 🗑️",
@@ -761,6 +819,7 @@ if st.button("➕ Add Medication"):
 if st.button("Calculate"):
 
     total_cost = 0.0
+
     total_allowed = 0.0
 
     missing = []
