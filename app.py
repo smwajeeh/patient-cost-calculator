@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# ULTRA MODERN MEDICAL UI
+# CLEAN MODERN MEDICAL UI
 # ---------------------------------------------------
 
 st.markdown("""
@@ -26,129 +26,50 @@ st.markdown("""
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-:root {
-
-    --primary: #4c6fff;
-    --primary-dark: #3d5df3;
-
-    --success: #17c964;
-
-    --danger: #ff5b5b;
-
-    --bg: #f6f8fc;
-
-    --card: rgba(255,255,255,0.86);
-
-    --text: #14213d;
-
-    --muted: #7c8ba1;
-
-    --border: rgba(226,232,240,0.9);
-
-    --shadow:
-        0 12px 40px rgba(15,23,42,0.05);
-
-    --radius: 28px;
-}
-
-/* Hide Streamlit */
-
-#MainMenu {
-    visibility: hidden;
-}
-
-footer {
-    visibility: hidden;
-}
-
-header {
-    visibility: hidden;
-}
-
-[data-testid="stToolbar"] {
-    display: none !important;
-}
-
-/* Global */
-
-html,
-body,
-[class*="css"] {
-
+html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
-
-    color: var(--text);
 }
+
+/* App Background */
 
 .stApp {
-
     background:
         linear-gradient(
             180deg,
-            #fbfcff 0%,
-            #eef4ff 100%
+            #f5f8ff 0%,
+            #eef3ff 100%
         );
 }
 
-/* Layout */
+/* Hide Streamlit Branding */
+
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Main Layout */
 
 .block-container {
-
-    max-width: 1320px;
-
-    padding-top: 2rem !important;
-
-    padding-bottom: 4rem !important;
+    padding-top: 2rem;
+    max-width: 1250px;
 }
 
-/* Hero */
+/* HERO SECTION */
 
-.hero {
+.hero-container {
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,0.96),
-            rgba(255,255,255,0.82)
-        );
+    background: white;
 
-    border-radius: 34px;
+    border-radius: 30px;
 
     padding: 40px;
 
-    border: 1px solid rgba(255,255,255,0.88);
+    margin-bottom: 30px;
 
-    box-shadow: var(--shadow);
+    border: 1px solid #edf2ff;
 
-    position: relative;
-
-    overflow: hidden;
-
-    margin-bottom: 2rem;
-
-    backdrop-filter: blur(18px);
-}
-
-.hero::before {
-
-    content: "";
-
-    position: absolute;
-
-    width: 420px;
-
-    height: 420px;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(76,111,255,0.10),
-            transparent 70%
-        );
-
-    top: -180px;
-
-    right: -120px;
+    box-shadow:
+        0 10px 40px rgba(0,0,0,0.06);
 }
 
 .hero-title {
@@ -157,110 +78,79 @@ body,
 
     font-weight: 800;
 
-    color: var(--text);
+    color: #14213d;
 
-    letter-spacing: -0.05em;
+    line-height: 1.1;
 
-    position: relative;
-
-    z-index: 2;
+    margin-bottom: 12px;
 }
 
-.hero-sub {
-
-    margin-top: 12px;
-
-    color: var(--muted);
+.hero-subtitle {
 
     font-size: 18px;
 
-    position: relative;
-
-    z-index: 2;
+    color: #6b7280;
 }
 
-/* Cards */
+/* SECTION CARDS */
 
-[data-testid="stVerticalBlock"] > div {
+.section-card {
 
-    background: rgba(255,255,255,0.72);
+    background: rgba(255,255,255,0.92);
 
-    backdrop-filter: blur(18px);
+    border-radius: 28px;
 
-    border-radius: var(--radius);
+    padding: 28px;
 
-    border: 1px solid rgba(255,255,255,0.82);
+    margin-bottom: 24px;
 
-    padding: 1.8rem;
+    border: 1px solid #edf2ff;
 
-    box-shadow: var(--shadow);
-
-    margin-bottom: 1.4rem;
-}
-
-/* Remove hero card */
-
-[data-testid="stVerticalBlock"] > div:first-child {
-
-    background: transparent;
-
-    border: none;
-
-    box-shadow: none;
-
-    padding: 0;
+    box-shadow:
+        0 8px 30px rgba(0,0,0,0.04);
 }
 
 /* Headers */
 
-h1,
-h2,
-h3,
-.stSubheader {
+h1, h2, h3 {
+    color: #315eff !important;
+    font-weight: 700 !important;
+}
 
-    color: var(--primary);
+/* Labels */
 
-    font-weight: 700;
-
-    letter-spacing: -0.03em;
+label, p, span {
+    color: #14213d !important;
 }
 
 /* Inputs */
 
-div[data-baseweb="input"] > div,
-div[data-baseweb="select"] > div,
-.stDateInput > div > div,
-.stNumberInput > div > div {
-
-    background: rgba(255,255,255,0.94);
-
-    border: 1px solid #e3eaf8;
-
-    border-radius: 18px;
-
-    min-height: 56px;
-
-    transition: all 0.18s ease;
-}
-
-div[data-baseweb="input"]:focus-within,
-div[data-baseweb="select"]:focus-within,
-.stDateInput > div > div:focus-within,
-.stNumberInput > div > div:focus-within {
-
-    border-color: var(--primary);
-
-    box-shadow:
-        0 0 0 5px rgba(76,111,255,0.12);
-}
-
-div[data-baseweb="input"] input,
+.stTextInput input,
 .stNumberInput input,
 .stDateInput input {
 
-    color: var(--text);
+    border-radius: 16px !important;
 
-    font-size: 15px;
+    border: 1px solid #dbe4ff !important;
+
+    padding: 12px !important;
+
+    background: white !important;
+
+    color: #14213d !important;
+}
+
+/* Selectboxes */
+
+.stSelectbox > div > div {
+
+    border-radius: 16px !important;
+
+    border: 1px solid #dbe4ff !important;
+
+    background: white !important;
+
+    color: #14213d !important;
 }
 
 /* Buttons */
@@ -271,102 +161,72 @@ div[data-baseweb="input"] input,
     background:
         linear-gradient(
             135deg,
-            var(--primary),
-            var(--primary-dark)
-        );
+            #4c6fff,
+            #315eff
+        ) !important;
 
-    color: white;
+    color: white !important;
 
-    border: none;
+    border: none !important;
 
-    border-radius: 18px;
+    border-radius: 16px !important;
 
-    padding: 0.78rem 1.6rem;
+    padding: 0.75rem 1.5rem !important;
 
-    font-weight: 700;
-
-    transition: all 0.2s ease;
+    font-weight: 700 !important;
 
     box-shadow:
-        0 14px 28px rgba(76,111,255,0.24);
+        0 10px 25px rgba(76,111,255,0.25);
 }
 
 .stButton > button:hover,
 .stDownloadButton > button:hover {
 
     transform: translateY(-2px);
-
-    box-shadow:
-        0 20px 36px rgba(76,111,255,0.30);
 }
 
 /* Metrics */
 
-[data-testid="stMetric"] {
+[data-testid="metric-container"] {
 
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,255,255,0.92),
-            rgba(248,251,255,0.88)
-        );
+    background: white;
 
-    border-radius: 24px;
+    border-radius: 22px;
 
-    border: 1px solid rgba(226,232,240,0.85);
+    padding: 20px;
 
-    padding: 1.1rem;
+    border: 1px solid #edf2ff;
 
     box-shadow:
-        0 8px 24px rgba(15,23,42,0.04);
-}
-
-[data-testid="stMetricLabel"] {
-
-    color: var(--muted);
-
-    font-weight: 600;
+        0 6px 24px rgba(0,0,0,0.04);
 }
 
 [data-testid="stMetricValue"] {
-
-    color: var(--primary-dark);
-
+    color: #315eff;
     font-weight: 800;
-
-    letter-spacing: -0.03em;
 }
 
 /* Slider */
 
-.stSlider [data-baseweb="slider"] [role="slider"] {
-
-    background-color: var(--primary);
-
-    border: 4px solid white;
-}
-
-.stSlider [data-baseweb="slider"] > div > div {
-
-    background-color:
-        rgba(76,111,255,0.18);
+.stSlider > div > div > div > div {
+    background-color: #4c6fff !important;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------
-# HERO SECTION
+# HERO
 # ---------------------------------------------------
 
 st.markdown("""
-<div class="hero">
+<div class="hero-container">
 
     <div class="hero-title">
         💊 Patient Treatment Cost Calculator
     </div>
 
-    <div class="hero-sub">
+    <div class="hero-subtitle">
         Accurate estimates for informed healthcare decisions
     </div>
 
@@ -401,7 +261,6 @@ def convert_to_mg(dose, unit):
 
 
 def format_date_us(d):
-
     return d.strftime("%m-%d-%Y")
 
 
@@ -442,20 +301,16 @@ def generate_pdf(data):
     return buffer
 
 # ---------------------------------------------------
-# LOAD DATA
+# LOAD EXCEL
 # ---------------------------------------------------
 
 try:
 
-    df = pd.read_excel(
-        "drug_data.xlsx"
-    )
+    df = pd.read_excel("drug_data.xlsx")
 
 except Exception as e:
 
-    st.error(
-        f"Unable to load drug_data.xlsx: {e}"
-    )
+    st.error(f"Unable to load drug_data.xlsx: {e}")
 
     st.stop()
 
@@ -521,7 +376,7 @@ if "meds" not in st.session_state:
 
     st.session_state.meds = [{
         "drug": "Select Drug",
-        "dose": float(0.0),
+        "dose": 0.0,
         "unit": "mgs"
     }]
 
@@ -531,6 +386,8 @@ if "show_summary" not in st.session_state:
 # ---------------------------------------------------
 # PATIENT INFO
 # ---------------------------------------------------
+
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
 
 st.subheader("🧑 Patient Information")
 
@@ -587,34 +444,48 @@ with c3:
         ]
     )
 
+st.markdown('</div>', unsafe_allow_html=True)
+
 # ---------------------------------------------------
 # INSURANCE
 # ---------------------------------------------------
 
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
+
 st.subheader("🏥 Insurance")
 
-payer = st.selectbox(
-    "Primary Insurance",
-    payer_columns
-)
+c1, c2 = st.columns(2)
 
-primary_pct = st.slider(
-    "Primary Coverage %",
-    0,
-    100,
-    80
-)
+with c1:
 
-copay = st.number_input(
-    "Copay",
-    min_value=0.0,
-    value=0.0,
-    step=1.0
-)
+    payer = st.selectbox(
+        "Primary Insurance",
+        payer_columns
+    )
+
+    primary_pct = st.slider(
+        "Primary Coverage %",
+        0,
+        100,
+        80
+    )
+
+with c2:
+
+    copay = st.number_input(
+        "Copay",
+        min_value=0.0,
+        value=0.0,
+        step=1.0
+    )
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # MEDICATIONS
 # ---------------------------------------------------
+
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
 
 st.subheader("💉 Medications")
 
@@ -622,7 +493,7 @@ if st.button("➕ Add Medication"):
 
     st.session_state.meds.append({
         "drug": "Select Drug",
-        "dose": float(0.0),
+        "dose": 0.0,
         "unit": "mgs"
     })
 
@@ -634,16 +505,14 @@ for i, med in enumerate(
     st.session_state.meds
 ):
 
-    col1, col2, col3 = st.columns(
-        [4,2,2]
-    )
+    col1, col2, col3 = st.columns([4,2,2])
 
     current_drug = str(
         med.get("drug", "Select Drug")
     )
 
     current_dose = float(
-        med.get("dose", 0.0) or 0.0
+        med.get("dose", 0.0)
     )
 
     current_unit = str(
@@ -688,11 +557,11 @@ for i, med in enumerate(
 
 st.session_state.meds = updated
 
+st.markdown('</div>', unsafe_allow_html=True)
+
 # ---------------------------------------------------
 # CALCULATE
 # ---------------------------------------------------
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 if st.button("🧮 Calculate"):
 
@@ -707,12 +576,15 @@ if st.button("🧮 Calculate"):
         ).strip()
 
         dose_value = float(
-            entry.get("dose", 0.0) or 0.0
+            entry.get("dose", 0.0)
         )
 
         unit_value = str(
             entry.get("unit", "")
         ).strip()
+
+        if drug_name == "Select Drug":
+            continue
 
         filtered = df[
             df["Drug_Name_Clean"]
@@ -761,9 +633,9 @@ if st.button("🧮 Calculate"):
     )
 
     st.session_state.summary = {
-        "cost": float(total_cost),
-        "primary": float(primary_payment),
-        "patient": float(patient_payment)
+        "cost": total_cost,
+        "primary": primary_payment,
+        "patient": patient_payment
     }
 
     st.session_state.show_summary = True
@@ -776,9 +648,9 @@ if st.session_state.show_summary:
 
     s = st.session_state.summary
 
-    st.subheader(
-        "💰 Financial Summary"
-    )
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+
+    st.subheader("💰 Financial Summary")
 
     c1, c2, c3 = st.columns(3)
 
@@ -798,6 +670,9 @@ if st.session_state.show_summary:
     )
 
     pdf = generate_pdf([
+        f"Patient Name: {patient_name}",
+        f"Provider: {provider}",
+        f"Location: {location}",
         f"Total Cost: ${s['cost']:,.2f}",
         f"Primary Pays: ${s['primary']:,.2f}",
         f"Patient Pays: ${s['patient']:,.2f}"
@@ -808,3 +683,5 @@ if st.session_state.show_summary:
         pdf,
         "patient_treatment_report.pdf"
     )
+
+    st.markdown('</div>', unsafe_allow_html=True)
