@@ -3,9 +3,9 @@ import pandas as pd
 import math
 import re
 from datetime import date, timedelta
+from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from io import BytesIO
 
 # ---------------------------------------------------
 # PAGE CONFIG
@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# CLEAN MODERN MEDICAL UI
+# PROFESSIONAL MODERN UI
 # ---------------------------------------------------
 
 st.markdown("""
@@ -30,57 +30,59 @@ html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-/* App Background */
+/* Main Background */
 
 .stApp {
-    background:
-        linear-gradient(
-            180deg,
-            #f5f8ff 0%,
-            #eef3ff 100%
-        );
+    background: linear-gradient(
+        180deg,
+        #f4f7ff 0%,
+        #edf3ff 100%
+    );
 }
 
-/* Hide Streamlit Branding */
+/* Hide Streamlit */
 
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
 
 /* Main Layout */
 
 .block-container {
-    padding-top: 2rem;
     max-width: 1250px;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
 }
 
-/* HERO SECTION */
+/* HERO */
 
-.hero-container {
+.hero {
 
-    background: white;
+    background: linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #f7f9ff 100%
+    );
 
-    border-radius: 30px;
+    border-radius: 28px;
 
-    padding: 40px;
+    padding: 45px;
 
     margin-bottom: 30px;
 
-    border: 1px solid #edf2ff;
+    border: 1px solid #e8eeff;
 
     box-shadow:
-        0 10px 40px rgba(0,0,0,0.06);
+        0 10px 40px rgba(0,0,0,0.05);
 }
 
 .hero-title {
 
-    font-size: 52px;
+    font-size: 48px;
 
     font-weight: 800;
 
     color: #14213d;
-
-    line-height: 1.1;
 
     margin-bottom: 12px;
 }
@@ -92,35 +94,42 @@ header {visibility: hidden;}
     color: #6b7280;
 }
 
-/* SECTION CARDS */
+/* Sections */
 
-.section-card {
+.section {
 
-    background: rgba(255,255,255,0.92);
+    background: rgba(255,255,255,0.88);
 
-    border-radius: 28px;
+    border-radius: 24px;
 
-    padding: 28px;
+    padding: 30px;
 
     margin-bottom: 24px;
 
-    border: 1px solid #edf2ff;
+    border: 1px solid #e9efff;
 
     box-shadow:
-        0 8px 30px rgba(0,0,0,0.04);
+        0 6px 24px rgba(0,0,0,0.04);
 }
 
 /* Headers */
 
-h1, h2, h3 {
-    color: #315eff !important;
-    font-weight: 700 !important;
+.section h3 {
+
+    color: #315eff;
+
+    font-size: 32px;
+
+    font-weight: 700;
+
+    margin-bottom: 25px;
 }
 
 /* Labels */
 
-label, p, span {
-    color: #14213d !important;
+label {
+    color: #334155 !important;
+    font-weight: 600 !important;
 }
 
 /* Inputs */
@@ -129,28 +138,26 @@ label, p, span {
 .stNumberInput input,
 .stDateInput input {
 
-    border-radius: 16px !important;
-
-    border: 1px solid #dbe4ff !important;
-
-    padding: 12px !important;
-
     background: white !important;
 
     color: #14213d !important;
+
+    border: 1px solid #dbe4ff !important;
+
+    border-radius: 14px !important;
+
+    padding: 12px !important;
 }
 
-/* Selectboxes */
+/* Select */
 
 .stSelectbox > div > div {
 
-    border-radius: 16px !important;
+    background: white !important;
 
     border: 1px solid #dbe4ff !important;
 
-    background: white !important;
-
-    color: #14213d !important;
+    border-radius: 14px !important;
 }
 
 /* Buttons */
@@ -158,29 +165,27 @@ label, p, span {
 .stButton > button,
 .stDownloadButton > button {
 
-    background:
-        linear-gradient(
-            135deg,
-            #4c6fff,
-            #315eff
-        ) !important;
+    background: linear-gradient(
+        135deg,
+        #4c6fff,
+        #315eff
+    ) !important;
 
     color: white !important;
 
     border: none !important;
 
-    border-radius: 16px !important;
+    border-radius: 14px !important;
 
-    padding: 0.75rem 1.5rem !important;
+    padding: 0.8rem 1.5rem !important;
 
     font-weight: 700 !important;
 
     box-shadow:
-        0 10px 25px rgba(76,111,255,0.25);
+        0 8px 24px rgba(76,111,255,0.25);
 }
 
-.stButton > button:hover,
-.stDownloadButton > button:hover {
+.stButton > button:hover {
 
     transform: translateY(-2px);
 }
@@ -191,18 +196,27 @@ label, p, span {
 
     background: white;
 
-    border-radius: 22px;
+    border-radius: 20px;
 
-    padding: 20px;
+    padding: 22px;
 
-    border: 1px solid #edf2ff;
+    border: 1px solid #e8eeff;
 
     box-shadow:
         0 6px 24px rgba(0,0,0,0.04);
 }
 
+[data-testid="stMetricLabel"] {
+
+    color: #64748b;
+
+    font-weight: 600;
+}
+
 [data-testid="stMetricValue"] {
+
     color: #315eff;
+
     font-weight: 800;
 }
 
@@ -210,6 +224,14 @@ label, p, span {
 
 .stSlider > div > div > div > div {
     background-color: #4c6fff !important;
+}
+
+/* Remove weird dark controls */
+
+button.step-up,
+button.step-down {
+    background: white !important;
+    color: black !important;
 }
 
 </style>
@@ -220,7 +242,7 @@ label, p, span {
 # ---------------------------------------------------
 
 st.markdown("""
-<div class="hero-container">
+<div class="hero">
 
     <div class="hero-title">
         💊 Patient Treatment Cost Calculator
@@ -301,7 +323,7 @@ def generate_pdf(data):
     return buffer
 
 # ---------------------------------------------------
-# LOAD EXCEL
+# LOAD DATA
 # ---------------------------------------------------
 
 try:
@@ -387,9 +409,9 @@ if "show_summary" not in st.session_state:
 # PATIENT INFO
 # ---------------------------------------------------
 
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
+st.markdown('<div class="section">', unsafe_allow_html=True)
 
-st.subheader("🧑 Patient Information")
+st.markdown("<h3>🧑 Patient Information</h3>", unsafe_allow_html=True)
 
 providers = sorted([
     "Navneet Mittal MD",
@@ -444,15 +466,15 @@ with c3:
         ]
     )
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # INSURANCE
 # ---------------------------------------------------
 
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
+st.markdown('<div class="section">', unsafe_allow_html=True)
 
-st.subheader("🏥 Insurance")
+st.markdown("<h3>🏥 Insurance</h3>", unsafe_allow_html=True)
 
 c1, c2 = st.columns(2)
 
@@ -479,15 +501,15 @@ with c2:
         step=1.0
     )
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # MEDICATIONS
 # ---------------------------------------------------
 
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
+st.markdown('<div class="section">', unsafe_allow_html=True)
 
-st.subheader("💉 Medications")
+st.markdown("<h3>💉 Medications</h3>", unsafe_allow_html=True)
 
 if st.button("➕ Add Medication"):
 
@@ -505,7 +527,7 @@ for i, med in enumerate(
     st.session_state.meds
 ):
 
-    col1, col2, col3 = st.columns([4,2,2])
+    c1, c2, c3 = st.columns([4,2,2])
 
     current_drug = str(
         med.get("drug", "Select Drug")
@@ -519,7 +541,7 @@ for i, med in enumerate(
         med.get("unit", "mgs")
     )
 
-    drug = col1.selectbox(
+    drug = c1.selectbox(
         "Drug",
         drug_list,
         index=(
@@ -530,7 +552,7 @@ for i, med in enumerate(
         key=f"d{i}"
     )
 
-    dose = col2.number_input(
+    dose = c2.number_input(
         "Dose",
         min_value=0.0,
         value=float(current_dose),
@@ -538,7 +560,7 @@ for i, med in enumerate(
         key=f"ds{i}"
     )
 
-    unit = col3.selectbox(
+    unit = c3.selectbox(
         "Units",
         unit_list,
         index=(
@@ -557,7 +579,7 @@ for i, med in enumerate(
 
 st.session_state.meds = updated
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # CALCULATE
@@ -640,6 +662,8 @@ if st.button("🧮 Calculate"):
 
     st.session_state.show_summary = True
 
+st.markdown("</div>", unsafe_allow_html=True)
+
 # ---------------------------------------------------
 # SUMMARY
 # ---------------------------------------------------
@@ -648,9 +672,9 @@ if st.session_state.show_summary:
 
     s = st.session_state.summary
 
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section">', unsafe_allow_html=True)
 
-    st.subheader("💰 Financial Summary")
+    st.markdown("<h3>💰 Financial Summary</h3>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
 
@@ -684,4 +708,4 @@ if st.session_state.show_summary:
         "patient_treatment_report.pdf"
     )
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
